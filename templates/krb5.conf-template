@@ -1,0 +1,45 @@
+#File modified by ipa-client-install
+
+includedir /etc/krb5.conf.d/
+includedir /var/lib/sss/pubconf/krb5.include.d/
+
+[libdefaults]
+  default_realm = NIX.MDS.XYZ
+  dns_lookup_realm = false
+  dns_lookup_kdc = true
+  rdns = false
+  dns_canonicalize_hostname = true
+  ticket_lifetime = 24h
+  forwardable = true
+  udp_preference_limit = 0
+  default_ccache_name = KEYRING:persistent:%{uid}
+
+
+[realms]
+  NIX.MDS.XYZ = {
+    kdc = idmipa01.nix.mds.xyz:88
+    master_kdc = idmipa01.nix.mds.xyz:88
+    admin_server = idmipa01.nix.mds.xyz:749
+    kpasswd_server = idmipa01.nix.mds.xyz:464
+    kdc = idmipa02.nix.mds.xyz:88
+    master_kdc = idmipa02.nix.mds.xyz:88
+    admin_server = idmipa02.nix.mds.xyz:749
+    kpasswd_server = idmipa02.nix.mds.xyz:464
+    default_domain = nix.mds.xyz
+    pkinit_anchors = FILE:/var/lib/ipa-client/pki/kdc-ca-bundle.pem
+    pkinit_pool = FILE:/var/lib/ipa-client/pki/ca-bundle.pem
+
+  }
+
+  MDS.XYZ = {
+    kdc = ad.mds.xyz
+    default_domain = mds.xyz
+  }
+
+[domain_realm]
+  .nix.mds.xyz = NIX.MDS.XYZ
+  nix.mds.xyz = NIX.MDS.XYZ
+  TEMPLATE-HOSTNAME.nix.mds.xyz = NIX.MDS.XYZ
+  .mds.xyz = MDS.XYZ
+  mds.xyz = MDS.XYZ
+

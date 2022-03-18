@@ -1,0 +1,40 @@
+[domain/nix.mds.xyz]
+cache_credentials = True
+krb5_store_password_if_offline = True
+ipa_domain = nix.mds.xyz
+id_provider = ipa
+auth_provider = ipa
+access_provider = ipa
+ipa_hostname = template-rhel7.nix.mds.xyz
+chpass_provider = ipa
+ipa_server = idmipa01.nix.mds.xyz, idmipa02.nix.mds.xyz
+ldap_tls_cacert = /etc/ipa/ca.crt
+autofs_provider = ipa
+ipa_automount_location = UserHomeDir01
+
+
+[sssd]
+services = nss, sudo, pam, autofs, ssh
+domains = nix.mds.xyz
+
+
+[nss]
+homedir_substring = /home
+
+
+[pam]
+
+[sudo]
+
+[autofs]
+
+[ssh]
+
+[pac]
+
+[ifp]
+
+[secrets]
+
+[session_recording]
+
