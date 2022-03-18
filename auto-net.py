@@ -1,40 +1,14 @@
 #!/bin/bash -x
-#
-# This code uses the VMWare parameters for retrieving host information and configuring the machines thereafter, grabbing an IP and enabling 
-# central authentication in the process.  What is checked, or done:
-#
-#	- Check DNS servers to verify if an IP is taken. 
-#	- Check if IP is pingable.
-#	- Check if IP exists in the specified DNS server list.
-#
-# If IP checks pass, the IP is assigned to this VM.
-#
-#
-# Contributors / Authors:
-# 
-# 	Tom Kacperski
-#
-#
 
 # LAB DNS List
 LDNS=( 192.168.0.224 192.168.0.44 192.168.0.45 192.168.0.154 192.168.0.155 );
-
-INTNAME="ens192";
 
 NDOMAIN="nix.mds.xyz";
 IPA01="idmipa01";
 IPA02="idmipa02";
 UNDOMAIN=${NDOMAIN^^};					# Uppercase the domain.
 NCPATH="/etc/sysconfig/network-scripts";
-
-
-# Network Interface Config Template
-IFCFG_T="$NCPATH/ifcfg-$INTNAME-template";
-IFCFG_C="$NCPATH/ifcfg-$INTNAME";
-
-# KRB5 Configuration Files
-KRB5_T="/etc/krb5.conf-template";
-KRB5_C="/etc/krb5.conf";
+IFCFG_T="$NCPATH/template-ifcfg-eth0";
 
 IPSUBNET=192.168.0.0/24;
 IPRANGE="192.168.0.100-192.168.0.255";
@@ -45,33 +19,15 @@ PATH_DHCLIENT_CONF=/etc/dhcp/dhclient.conf;
 RETRIES=20;				# Number of times to try to get a unique IP.
 
 TMPIP="/tmp/.eDrsldDI.tmp";
-CONFIGFILE="./auto-net.conf";
-USERCONFIGFILE="";
 
-# SSSD Config files
-SSSDP_C=/etc/sssd/sssd.conf;
-SSSDP_T="$SSSDP_C-template";
+# usage() {
+#       echo "Usage: $0 [-n <"NS LIST"> ] [-d "<DOMAIN>" ]" 1>&2;
+#       exit 1;
+# }
 
-# SSHD Config files
-SSHD_C="/etc/ssh/sshd_config";
-SSHD_T="/etc/ssh/sshd_config-template";
-
-IPACLIENTCREDFILE="/tmp/ipa-client-credentials";
-
-# Systemd config.
-SYSDAUTONET="/etc/systemd/system/auto-net.service";
-
-
-usage() {
-	echo "Usage: $0 [-n <"NS LIST"> ] [-d "<DOMAIN>" ]" 1>&2;
-	exit 1;
-}
-
-# Setup flag:
-ISSETUP=false;
 
 # If parameters are specified, they'll overwrite the above defaults.
-while getopts ":n:d:p:b:r:c:s" ARG; do
+while getopts ":n:d:p:b:r:" ARG; do
     case "${ARG}" in
         n)
             LDNS=( ${OPTARG} );
@@ -89,89 +45,12 @@ while getopts ":n:d:p:b:r:c:s" ARG; do
         r)
             IPSUBNET=${OPTARG}
             ;;
-        c)
-            USERCONFIGFILE=${OPTARG}
-            ;;
-        s)
-            ISSETUP=true
-            ;;
         *)
             usage
             ;;
     esac
 done
 shift $((OPTIND-1))
-
-
-# Source the config file only if a user provided config file was not provided.
-if [[ -r $CONFIGFILE && $USERCONFIGFILE != "" && ! -r $USERCONFIGFILE ]]; then
-    echo "Using default config file: $CONFIGFILE";
-    . $CONFIGFILE;
-elif [[ -r $USERCONFIGFILE ]]
-    . $USERCONFIGFILE; 
-else
-    echo "No proper config file specified.  Using script defined defaults.";
-fi
-
-# ------------------------------------------------------------------------------------
-# Configure the templates if missing.
-# ------------------------------------------------------------------------------------
-
-# NIC card.
-if [[ ! -r $IFCFG_T ]]; then
-	echo "NIC Card Template missing. Copying $IFCFG_T to the sysconfig network-scripts folder.";
-	/bin/cp ./templates/ifcfg-$INTNAME-template $IFCFG_T;
-else
-	echo "ERROR: No network configuration files round. Exiting.";
-	exit 1;
-fi
-
-# SSSD Config File: File will be auto copied if missing.
-
-# KRB5 Configuration Files
-if [[ ! -r $KRB5_T [[; then
-	echo "KRB5 Config Template missing. Copying $KRB5_T config file to the /etc/ folder.";
-	/bin/cp ./templates/$(basename $KRB5_T) $KRB5_T;
-else
-	echo "ERROR: No KRB5 config file found in the templates folder.  Please create one before running the script once more."
-	exit 1;
-fi
-
-
-# SSHD Config Files
-if [[ ! -r $SSHD_T [[; then
-	echo "SSHD Config Template missing. Copying $SSHD_T config file to the /etc/ folder.";
-	/bin/cp ./templates/$(basename $SSHD_T) $SSHD_T;
-else
-	echo "ERROR: No SSHD config file found in the templates folder.  Please create one before running the script once more.";
-	exit 1;
-fi
-
-
-# Systemd Auto Net startup script.
-if [[ ! -r $SYSDAUTONET ]]; then
-	 echo "Systemd Auto Net startup file was missing.  Copying $(basename $SYSDAUTONET) to $SYSDAUTONET .";
-	 /bin/cp ./templates/$(basename $SYSDAUTONET);
-	 systemctl enable @SYSDAUTONET;
-	 systemctl daemon-reload;
-
-else
-	echo "ERROR: No Systemd template found.  Please create one before running the script once more.";
-	exit 1;
-fi
-
-
-# Exit if only a setup is required.
-if [[ $ISSETUP == "true" ]]; then
-	echo "NOTE: Setup specified.  Exiting since ony setup required.  Not configuring system.";
-	echo "IMPORTANT: Don't forget to set a password in $IPACLIENTCREDFILE file. Otherwise SSSD won't bind with Free IPA.";
-	exit 0;
-else
-	echo "Setup (ISSETUP) was set to false, meaning configuration of this system will commence.";
-fi
-
-# ------------------------------------------------------------------------------------
-
 
 
 # Variables you've used are going to be printed below.
@@ -182,9 +61,9 @@ for ITM in "${LDNS[@]}"; do
 done
 
 
-# Exit if we don't see $INTNAME.  
-[[ $( ip a | grep -Ei "$INTNAME" ) == "" ]] && {
-	echo "ERROR: This client doesn't have an $INTNAME NIC.  Script limited to clients with $INTNAME interface only.";
+# Exit if we don't see eth0.  
+[[ $( ip a | grep -Ei "eth0" ) == "" ]] && {
+	echo "ERROR: This client doesn't have an eth0 NIC.  Script limited to clients with eth0 interface only.";
         exit 0;
 }
 
@@ -295,8 +174,8 @@ while [[ true ]]; do
 	rm -f /var/lib/dhclient/*leases;
 
 	# Determine if we have a 1) temporary IP assigned, 2) our hostname contains 'template' in the name.
-	EIPADDR=$(ip a|awk -v intname=$INTNAME '{
-	        if ( $0 ~ /"'"$INTNAME"'"/ )
+	EIPADDR=$(ip a|awk '{
+	        if ( $0 ~ /eth0/ )
 	                ETH=1;
 	        if ( $0 ~ /inet [0-9]/ && ETH == 1 ) {
 	                gsub (/\/.*/, "", $0 );
@@ -317,9 +196,9 @@ while [[ true ]]; do
 	[[ ( ! -z $TIPADDR || -r $IFCFG_T )  || ( -z $EIPADDR && $(hostname|grep -Ei "template") != "" ) ]] && {
 
 		# Logic below impeded unique IP assignment.  Removing for now.
-	        # ifdown $INTNAME;
+	        # ifdown eth0;
 		# rm -f /var/lib/dhclient/*leases;
-		# ifup $INTNAME;
+		# ifup eth0;
 
 		echo "PATH_DHCLIENT_CONF = $PATH_DHCLIENT_CONF";
 		dhclient -v;				# <-------------------<  HERE HERE <-------------------<
@@ -327,9 +206,9 @@ while [[ true ]]; do
 		echo "WARNING: Looks like host already had an IP address so must be on the network.  Not running dhclient again."; 
 	};
 
-	# Get the IP address assigned to $INTNAME by dhclient above. 
+	# Get the IP address assigned to eth0 by dhclient above. 
 	IPADDR=$(ip a|awk '{
-	        if ( $0 ~ /"'"$INTNAME"'"/ )
+	        if ( $0 ~ /eth0/ )
 	                ETH=1;
 	        if ( $0 ~ /inet [0-9]/ && ETH == 1 ) {
 	                gsub (/\/.*/, "", $0 );
@@ -396,10 +275,6 @@ while [[ true ]]; do
 
 	# If we got here and have no IP address, try the NMAP method.
 	if [[ -z "$IPADDR" ]]; then
-                if [[ $(which nmap) == "" ]]; then
-                        echo "WARNING: nmap not found.  Installing nmap and netcat for required network tools.";
-			yum install nmap netcat nmap-netcat -y
-                fi
 		RETV=$( nmap-subnet | awk '/RETV: /{ print $2; }' );
 		IPADDR = $RETV;
 	fi
@@ -435,7 +310,7 @@ while [[ true ]]; do
 		exit 0;
 	}
 
-	# Create the static configuration file ifcfg-$INTNAME using the 1) IP and 2) hostname derived above.
+	# Create the static configuration file ifcfg-eth0 using the 1) IP and 2) hostname derived above.
 	awk 'BEGIN {
 	                IPADDR="'"$IPADDR"'";
 	                NHOSTNAME="'"$NHOSTNAME"'";
@@ -449,10 +324,10 @@ while [[ true ]]; do
 	                        $0="HOSTNAME="NHOSTNAME"."NDOMAIN;
 	                }
 	                print $0;
-	        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
+	        }' < $NCPATH/ifcfg-eth0 > $NCPATH/ifcfg-n-eth0;
 
 	# -------------------------
-	# In the ifcfg-$INTNAME a few things are done.
+	# In the ifcfg-eth0 a few things are done.
 	# 1) PEERDNS=no  -  This causes many extra nameservers to be added to /etc/resolv.conf.  Need to disable this or it will
 	#                   affect if we can ssh between hosts using the short names after we are added to FreeIPA / KDC.
 	# 
@@ -461,7 +336,7 @@ while [[ true ]]; do
 	HOSTEXISTS=$( hostnamectl | grep -Ei "$NHOSTNAME[.]$NDOMAIN" );
 	if [[ $IPAEXISTS != "" || $HOSTEXISTS != "" ]]; then
 		echo "ERROR: This hosts hostname matches it's intended future name, therefore no change is needed.";
-		rm -f $NCPATH/ifcfg-n-$INTNAME;
+		rm -f $NCPATH/ifcfg-n-eth0;
 
 		if echo "$HOSTEXISTS" | grep -Ei template 2>&1 >/dev/null; then
 			echo "ERROR: This hosts hostname contains the word 'template' which matches it's intended name.  Exiting as a result since we consider this host as complete in this scenario.";
@@ -480,18 +355,10 @@ done
 #
 # ------------------------------------------------------------------------
 echo "Ok, we're going to do a bunch of changes to the system.  You have 5 seconds to backout by pressing CTRL + C to get out.";
+sleep 5;
 
-
-if [[ $APPLYCONFIG == "true" || $APPLYCONFIG == "yes" ]]; then
-	echo "NOACT: Not applying config as per the config file setting parameter APPLYCONFIG ($APPLYCONFIG).";
-	exit 0;
-else
-	sleep 5;
-fi
-
-
-cp -p $NCPATH/ifcfg-$INTNAME $NCPATH/_ifcfg-$INTNAME-backup-$(date +%s);
-mv $NCPATH/ifcfg-n-$INTNAME $NCPATH/ifcfg-$INTNAME;
+cp -p $NCPATH/ifcfg-eth0 $NCPATH/_ifcfg-eth0-backup-$(date +%s);
+mv $NCPATH/ifcfg-n-eth0 $NCPATH/ifcfg-eth0;
 
 dhclient -r; dhclient -x;
 hostnamectl set-hostname $NHOSTNAME.$NDOMAIN;
@@ -506,14 +373,14 @@ yum update sssd -y;
 
 
 # Check if temporary password file exists with our credentials.  Exit if not.
-[[ ! -r $IPACLIENTCREDFILE ]] && {
+[[ ! -r /tmp/.resolv.conf.swp ]] && {
 	echo "ERROR: Temporary pass file is missing.  Recreate it and place the IPA password in it.  Check the script for the file name."
 	exit 0;
 }
 
 
 # Get temp pa$$.
-TMPP=$(cat $IPACLIENTCREDFILE);
+TMPP=$(cat /tmp/.resolv.conf.swp);
 
 ipa-client-install --uninstall;
 ipa-client-install --force-join -p autojoin -w "$TMPP" --fixed-primary --server=$IPA01.$NDOMAIN --server=$IPA02.$NDOMAIN --domain=$NDOMAIN --realm=$UNDOMAIN -U
@@ -521,15 +388,15 @@ ipa-client-install --force-join -p autojoin -w "$TMPP" --fixed-primary --server=
 authconfig --enablesssd --enablesssdauth --enablemkhomedir --updateall --update;
 
 echo "Checking for the krb5.conf template file.  If one exists, I'm going to reconfigure the host one to use the template.";
-[[ -r $KRB5_T ]] && {
-        cp -p $KRB5_C ${KRB5_C}-backup-$(date +%s);
-        cat $KRB5_T | sed -e "s/TEMPLATE-HOSTNAME.*=/$(hostname) =/g" > $KRB5_C;
+[[ -r /etc/krb5.conf-template ]] && {
+        cp -p /etc/krb5.conf /etc/krb5.conf-backup-$(date +%s);
+        cat /etc/krb5.conf-template | sed -e "s/TEMPLATE-HOSTNAME.*=/$(hostname) =/g" > /etc/krb5.conf;
 }
 
 # Modify SSHD accordingly.
-[[ -r $SSHD_T ]] && {
+[[ -r /etc/ssh/sshd_config-template ]] && {
 	# Need two settings here.  See this page: http://microdevsys.com/wp/getting-asked-for-when-using-host-shortname-with-kerberos-delegation/
-	cp -p $SSHD_T $SSHD_C;
+	cp -p /etc/ssh/sshd_config-template /etc/ssh/sshd_config;
 }
 
 # Sync up the time.  If we don't, ssh to other servers won't work well.
@@ -539,8 +406,10 @@ hwclock --adjust;
 # Add auto mount for NFS home directories.
 ipa-client-automount --location=UserHomeDir01 -U
 
+SSSDP=/etc/sssd/sssd.conf;
+
 # Copy the template over the sssd.conf file in the event the package installer nukes the files.
-[[ ! -r $SSSDP_C ]] && /usr/bin/cp $SSSDP_T $SSSDP_C;
+[[ ! -r $SSSDP ]] && /usr/bin/cp $SSSDP-template $SSSDP;
 
 # Adjust SSSD home directories and some DNS and LDAP values.
 cat > sssd-updates.txt <<SSSD-END
@@ -569,9 +438,9 @@ SSSD-END
                 } else {
                         print;
                 }
-        }' < $SSSDP_C > $SSSDP_C-new;
-        /usr/bin/mv $SSSDP_C-new $SSSDP_C;
-	chmod 600 $SSSDP_C;
+        }' < $SSSDP > $SSSDP-new;
+        /usr/bin/mv $SSSDP-new $SSSDP;
+	chmod 600 $SSSDP;
         systemctl restart sssd;
 } || {
         echo "DONE: Nothing to update. Values dyndns_update = True|dyndns_update_ptr = True|ldap_schema = ad|ldap_id_mapping = True|override_homedir = /n/%d/%u already in file.";

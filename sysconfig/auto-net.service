@@ -1,0 +1,8 @@
+[Unit]
+After=network.target
+
+[Service]
+ExecStart=/etc/sysconfig/network-scripts/auto-net.sh
+
+[Install]
+WantedBy=default.target
