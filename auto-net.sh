@@ -107,7 +107,7 @@ shift $((OPTIND-1))
 if [[ -r $CONFIGFILE && $USERCONFIGFILE != "" && ! -r $USERCONFIGFILE ]]; then
     echo "Using default config file: $CONFIGFILE";
     . $CONFIGFILE;
-elif [[ -r $USERCONFIGFILE ]]
+elif [[ -r $USERCONFIGFILE ]]; then
     . $USERCONFIGFILE; 
 else
     echo "No proper config file specified.  Using script defined defaults.";
@@ -150,10 +150,10 @@ fi
 
 # Systemd Auto Net startup script.
 if [[ ! -r $SYSDAUTONET ]]; then
-	 echo "Systemd Auto Net startup file was missing.  Copying $(basename $SYSDAUTONET) to $SYSDAUTONET .";
-	 /bin/cp ./templates/$(basename $SYSDAUTONET);
-	 systemctl enable @SYSDAUTONET;
-	 systemctl daemon-reload;
+	echo "Systemd Auto Net startup file was missing.  Copying $(basename $SYSDAUTONET) to $SYSDAUTONET .";
+	/bin/cp ./templates/$(basename $SYSDAUTONET);
+	systemctl enable @SYSDAUTONET;
+	systemctl daemon-reload;
 
 else
 	echo "ERROR: No Systemd template found.  Please create one before running the script once more.";
