@@ -129,7 +129,7 @@ fi
 # SSSD Config File: File will be auto copied if missing.
 
 # KRB5 Configuration Files
-if [[ ! -r $KRB5_T [[; then
+if [[ ! -r $KRB5_T ]]; then
 	echo "KRB5 Config Template missing. Copying $KRB5_T config file to the /etc/ folder.";
 	/bin/cp ./templates/$(basename $KRB5_T) $KRB5_T;
 else
