@@ -184,7 +184,7 @@ fi
 
 # Exit if only a setup is required.
 if [[ $ISSETUP == "true" ]]; then
-	echo "NOTE: Setup specified.  Exiting since ony setup required.  Not configuring system.";
+	echo "NOTE: Setup specified.  Exiting since only setup required.  Not configuring system.";
 	echo "IMPORTANT: Don't forget to set a password in $IPACLIENTCREDFILE file. Otherwise SSSD won't bind with Free IPA.";
 	exit 0;
 else
