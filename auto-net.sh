@@ -130,7 +130,7 @@ fi
 # Configure the templates if missing.
 # ------------------------------------------------------------------------------------
 
-compare-config 'NIC Card Template missing' $IFCFG_TB $IFCFG_T;
+compare-config 'NIC Card Template missing' "$IFCFG_TB" "$IFCFG_T";
 
 # NIC card.
 if [[ ! -r $IFCFG_T ]]; then
