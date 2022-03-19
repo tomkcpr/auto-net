@@ -177,7 +177,7 @@ if [[ ! -r $SYSDAUTONET ]]; then
 	fi
 
 else
-	echo "Systemd startup file existed!";
+	echo "Systemd $SYSDAUTONET startup file existed!";
 fi
 
 
