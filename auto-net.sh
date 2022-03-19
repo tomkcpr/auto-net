@@ -177,8 +177,7 @@ if [[ ! -r $SYSDAUTONET ]]; then
 	fi
 
 else
-	echo "ERROR: No Systemd template found.  Please create one before running the script once more.";
-	exit 1;
+	echo "Systemd startup file existed!";
 fi
 
 
