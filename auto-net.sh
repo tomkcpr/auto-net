@@ -118,7 +118,7 @@ fi
 # ------------------------------------------------------------------------------------
 
 # NIC card.
-if [[ ! -r ./templates/$(basename $IFCFG_T) ]]; then
+if [[ ! -r $IFCFG_T ]]; then
 	echo "NIC Card Template missing. Copying $IFCFG_T to the sysconfig network-scripts folder.";
 	/bin/cp ./templates/ifcfg-$INTNAME-template $IFCFG_T;
 else
