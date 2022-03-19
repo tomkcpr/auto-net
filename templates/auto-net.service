@@ -2,6 +2,8 @@
 After=network.target
 
 [Service]
+User=root
+Group=root
 ExecStart=/tmp/auto-net/auto-net.sh
 
 [Install]
