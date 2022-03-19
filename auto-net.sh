@@ -124,7 +124,7 @@ function compare-config () {
 
 			# Comparing template NIC card.
 			if diff $cc_target ./templates/$cc_template; then
-				/bin/cp $cc_template $cc_target;
+				/bin/cp ./templates/$cc_template $cc_target;
 			else
 				echo "compare-config: Files $cc_template and $cc_target were the same.  Skipping copy.";
 			fi
