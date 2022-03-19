@@ -107,7 +107,11 @@ shift $((OPTIND-1))
 # ------------------------------------------------------------------------------------
 # FUNCTIONS
 # ------------------------------------------------------------------------------------
-function compare-config ( cc-msg, cc-template, cc-target ) {
+function compare-config ( ) {
+        cc-msg=$1;
+	cc-template=$2;
+	cc-target=$3;
+
 	echo "$cc-msg, $cc-template, $cc-target";
 }
 
