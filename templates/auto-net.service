@@ -2,7 +2,7 @@
 After=network.target
 
 [Service]
-ExecStart=/root/auto-net/auto-net.sh
+ExecStart=/tmp/auto-net/auto-net.sh
 
 [Install]
 WantedBy=default.target
