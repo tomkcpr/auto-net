@@ -116,26 +116,28 @@ function compare-config () {
 	cc_template="$2";
 	cc_target="$3";
 
+	cc_tfolder="./templates";
+
 	echo "compare-config: $cc_msg, $cc_template, $cc_target";
 
 	# NIC card.
 	if [[ ! -r $cc_target ]]; then
 		echo "compare-config: $cc_msg. Copying $cc_template to $cc_target.";
-		/bin/cp $cc_template $cc_target;
+		/bin/cp $cc_tfolder/$cc_template $cc_target;
 	else
-		if [[ -r ./templates/$cc_template ]]; then
+		if [[ -r $cc_tfolder/$cc_template ]]; then
 			echo "compare-config: File $cc_target existed. Comparing to the templates.  If different, $cc_target will be updated.";
 
 			# Comparing template NIC card.
-			if diff $cc_target ./templates/$cc_template; then
-				/bin/cp ./templates/$cc_template $cc_target;
+			if diff $cc_target $cc_tfolder/$cc_template; then
+				/bin/cp $cc_tfolder/$cc_template $cc_target;
 			else
 				echo "compare-config: Files $cc_template and $cc_target were the same.  Skipping copy.";
 			fi
 		
 		else
 		
-			echo "compare-config: ERROR: No network configuration files found in the ./templates folder. Expected to find $cc_template.  Exiting.";
+			echo "compare-config: ERROR: No network configuration files found in the $cc_tfolder folder. Expected to find $cc_template.  Exiting.";
 			exit 1;
 		fi
 	fi
