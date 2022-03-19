@@ -112,7 +112,7 @@ function compare-config ( cc-msg, cc-template, cc-target ) {
 }
 
 
-# Source the config file only if a user provided config file was not provided.
+# Source the config file only if a user provided config file was not provided on the command line.
 if [[ -r $CONFIGFILE && $USERCONFIGFILE != "" && ! -r $USERCONFIGFILE ]]; then
     echo "Using default config file: $CONFIGFILE";
     . $CONFIGFILE;
@@ -126,9 +126,11 @@ fi
 # Configure the templates if missing.
 # ------------------------------------------------------------------------------------
 
+compare-config ( "NIC Card Template missing" $IFCFG_TB $IFCFG_T );
+
 # NIC card.
 if [[ ! -r $IFCFG_T ]]; then
-	echo "NIC Card Template missing. Copying $IFCFG_T to the sysconfig network-scripts folder.";
+	echo "NIC Card Template missing. Copying $IFCFG_TB to $IFCFG_T.";
 	/bin/cp $IFCFG_TB $IFCFG_T;
 else
 	if [[ -r $IFCFG_TB ]]; then
@@ -139,7 +141,6 @@ else
 			/bin/cp $IFCFG_TB $IFCFG_T;
 		else
 			echo "Files $IFCFG_TB and $IFCFG_T were the same.  Skipping copy.";
-
 		fi
 		
 	else
