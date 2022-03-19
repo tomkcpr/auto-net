@@ -182,6 +182,7 @@ fi
 
 
 # Last but not least, let's copy this script to a folder that has execute permissions, instead of /root/auto-net/ .
+# /tmp is used since executing from /root/auto-net/ doesn't work and yields a permission denied.
 if [[ ! -d /tmp/auto-net ]]; then
 	echo "Copying contents of current /root/auto-net folder to /tmp for execution.";
 	cp -iRp /root/auto-net /tmp/;
