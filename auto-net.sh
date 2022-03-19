@@ -108,6 +108,20 @@ done
 shift $((OPTIND-1))
 
 
+# Change to the executing directory.
+CWD=$(pwd);
+MOI=$(basename $0);
+MOID=$(dirname $0);
+
+cd $MOID || { 
+	echo "FAILED to change to $MOID"; 
+	exit 0; 
+};
+NWD=$(pwd);
+
+
+
+
 # ------------------------------------------------------------------------------------
 # FUNCTIONS
 # ------------------------------------------------------------------------------------
@@ -187,6 +201,7 @@ if [[ ! -d /tmp/auto-net ]]; then
 	echo "Copying contents of current /root/auto-net folder to /tmp for execution.";
 	cp -iRp /root/auto-net /tmp/;
 	restorecon -irv /tmp/auto-net/;
+	chcon -t bin_t /tmp/auto-net/$(basename $0);
 fi
 
 
@@ -617,6 +632,10 @@ rm -f $IFCFG_T;
 # Clean up this boot script.
 rm -f /etc/dhcp/dhclient.conf
 rm -f /etc/sysconfig/network-scripts/auto-net.sh
+
+
+# Return to the former directory.
+cd $CWD;
 
 # Reboot the server to take all changes into effect and start up cleanly after all changes.
 reboot;
