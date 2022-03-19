@@ -112,7 +112,7 @@ function compare-config () {
 	cc_template="$2";
 	cc_target="$3";
 
-	echo "compate-config: $cc_msg, $cc_template, $cc_target";
+	echo "compare-config: $cc_msg, $cc_template, $cc_target";
 
 	# NIC card.
 	if [[ ! -r $cc_target ]]; then
@@ -123,7 +123,7 @@ function compare-config () {
 			echo "compare-config: File $cc_target existed. Comparing to the templates.  If different, $cc_target will be updated.";
 
 			# Comparing template NIC card.
-			if diff $cc_target $cc_template; then
+			if diff $cc_target ./templates/$cc_template; then
 				/bin/cp $cc_template $cc_target;
 			else
 				echo "compare-config: Files $cc_template and $cc_target were the same.  Skipping copy.";
