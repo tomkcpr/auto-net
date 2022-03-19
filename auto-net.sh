@@ -31,6 +31,7 @@ NCPATH="/etc/sysconfig/network-scripts";
 # Network Interface Config Template
 IFCFG_T="$NCPATH/ifcfg-$INTNAME-template";
 IFCFG_C="$NCPATH/ifcfg-$INTNAME";
+IFCFG_TB=$(basename $IFCFG_T);
 
 # KRB5 Configuration Files
 KRB5_T="/etc/krb5.conf-template";
@@ -103,6 +104,14 @@ done
 shift $((OPTIND-1))
 
 
+# ------------------------------------------------------------------------------------
+# FUNCTIONS
+# ------------------------------------------------------------------------------------
+function compare-config ( cc-msg, cc-template, cc-target ) {
+	echo "$cc-msg, $cc-template, $cc-target";
+}
+
+
 # Source the config file only if a user provided config file was not provided.
 if [[ -r $CONFIGFILE && $USERCONFIGFILE != "" && ! -r $USERCONFIGFILE ]]; then
     echo "Using default config file: $CONFIGFILE";
@@ -120,11 +129,27 @@ fi
 # NIC card.
 if [[ ! -r $IFCFG_T ]]; then
 	echo "NIC Card Template missing. Copying $IFCFG_T to the sysconfig network-scripts folder.";
-	/bin/cp ./templates/ifcfg-$INTNAME-template $IFCFG_T;
+	/bin/cp $IFCFG_TB $IFCFG_T;
 else
-	echo "ERROR: No network configuration files round. Exiting.";
-	exit 1;
+	if [[ -r $IFCFG_TB ]]; then
+		echo "File $IFCFG_T existed. Comparing to the templates.  If different, $IFCFG_T will be updated.";
+
+		# Comparing template NIC card.
+		if diff $IFCFG_T $IFCFG_TB; then
+			/bin/cp $IFCFG_TB $IFCFG_T;
+		else
+			echo "Files $IFCFG_TB and $IFCFG_T were the same.  Skipping copy.";
+
+		fi
+		
+	else
+		
+		echo "ERROR: No network configuration files found in the ./templates/$(basename $IFCFG_T) folder. Exiting.";
+		exit 1;
+	fi
 fi
+exit 0;
+
 
 # SSSD Config File: File will be auto copied if missing.
 
