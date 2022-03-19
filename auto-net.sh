@@ -186,6 +186,7 @@ fi
 if [[ ! -d /tmp/auto-net ]]; then
 	echo "Copying contents of current /root/auto-net folder to /tmp for execution.";
 	cp -iRp /root/auto-net /tmp/;
+	restorecon -irv /tmp/auto-net/;
 fi
 
 
