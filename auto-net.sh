@@ -139,7 +139,7 @@ fi
 
 
 # SSHD Config Files
-if [[ ! -r $SSHD_T [[; then
+if [[ ! -r $SSHD_T ]]; then
 	echo "SSHD Config Template missing. Copying $SSHD_T config file to the /etc/ folder.";
 	/bin/cp ./templates/$(basename $SSHD_T) $SSHD_T;
 else
