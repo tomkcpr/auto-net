@@ -137,7 +137,7 @@ if [[ ! -r $IFCFG_T ]]; then
 	echo "NIC Card Template missing. Copying $IFCFG_TB to $IFCFG_T.";
 	/bin/cp $IFCFG_TB $IFCFG_T;
 else
-	if [[ -r $IFCFG_TB ]]; then
+	if [[ -r ./templates/$IFCFG_TB ]]; then
 		echo "File $IFCFG_T existed. Comparing to the templates.  If different, $IFCFG_T will be updated.";
 
 		# Comparing template NIC card.
