@@ -131,7 +131,7 @@ fi
 # ------------------------------------------------------------------------------------
 
 compare-config 'NIC Card Template missing' "$IFCFG_TB" "$IFCFG_T";
-pwd
+
 # NIC card.
 if [[ ! -r $IFCFG_T ]]; then
 	echo "NIC Card Template missing. Copying $IFCFG_TB to $IFCFG_T.";
