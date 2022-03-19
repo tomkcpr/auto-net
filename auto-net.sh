@@ -182,10 +182,9 @@ fi
 
 
 # Last but not least, let's copy this script to a folder that has execute permissions, instead of /root/auto-net/ .
-if [[ ! -r /sbin/auto-net.sh ]]; then
-	/bin/cp -ip $(basename $0) /sbin/auto-net.sh;
-else
-	echo "WARNING:  A script by the name of /sbin/auto-net.sh already existed.  Not recopying. Update manually if you are sure overwriting is fine";
+if [[ ! -d /tmp/auto-net ]]; then
+	echo "Copying contents of current /root/auto-net folder to /tmp for execution.";
+	cp -iRp /root/auto-net /tmp/;
 fi
 
 
