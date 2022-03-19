@@ -162,8 +162,6 @@ compare-config 'NIC Card Template missing' "$IFCFG_TB" "$IFCFG_T";
 compare-config 'KRB5 Config Template missing' "$KRB5_TB" "$KRB5_T";
 compare-config 'KRB5 Config Template missing' "$SSHD_TB" "$SSHD_T";
 
-exit 0;
-
 # SSSD Config File: File will be auto copied if missing.
 
 # Systemd Auto Net startup script.
