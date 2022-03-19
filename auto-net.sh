@@ -181,6 +181,14 @@ else
 fi
 
 
+# Last but not least, let's copy this script to a folder that has execute permissions, instead of /root/auto-net/ .
+if [[ ! -r /sbin/auto-net.sh ]]; then
+	/bin/cp -ip $(basename $0) /sbin/auto-net.sh;
+else
+	echo "WARNING:  A script by the name of /sbin/auto-net.sh already existed.  Not recopying. Update manually if you are sure overwriting is fine";
+fi
+
+
 # Exit if only a setup is required.
 if [[ $ISSETUP == "true" ]]; then
 	echo "NOTE: Setup specified.  Exiting since only setup required.  Not configuring system.";
