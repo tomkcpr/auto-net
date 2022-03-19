@@ -166,7 +166,7 @@ compare-config 'KRB5 Config Template missing' "$SSHD_TB" "$SSHD_T";
 
 # Systemd Auto Net startup script.
 if [[ ! -r $SYSDAUTONET ]]; then
-	if [[ ! -r ./templates/$(basename $SYSDAUTONET) ]]; then
+	if [[ -r ./templates/$(basename $SYSDAUTONET) ]]; then
 		echo "Systemd Auto Net startup file was missing.  Copying $(basename $SYSDAUTONET) to $SYSDAUTONET .";
 		/bin/cp ./templates/$(basename $SYSDAUTONET) $SYSDAUTONET;
 		systemctl enable $SYSDAUTONET;
