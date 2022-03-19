@@ -33,9 +33,12 @@ IFCFG_T="$NCPATH/ifcfg-$INTNAME-template";
 IFCFG_C="$NCPATH/ifcfg-$INTNAME";
 IFCFG_TB=$(basename $IFCFG_T);
 
+
 # KRB5 Configuration Files
 KRB5_T="/etc/krb5.conf-template";
 KRB5_C="/etc/krb5.conf";
+KRB5_TB=$(basename $KRB5_T);
+
 
 IPSUBNET=192.168.0.0/24;
 IPRANGE="192.168.0.100-192.168.0.255";
@@ -56,6 +59,7 @@ SSSDP_T="$SSSDP_C-template";
 # SSHD Config files
 SSHD_C="/etc/ssh/sshd_config";
 SSHD_T="/etc/ssh/sshd_config-template";
+SSHD_TB=$(basename $SSHD_T);
 
 IPACLIENTCREDFILE="/tmp/ipa-client-credentials";
 
@@ -153,37 +157,24 @@ fi
 # ------------------------------------------------------------------------------------
 
 compare-config 'NIC Card Template missing' "$IFCFG_TB" "$IFCFG_T";
+compare-config 'KRB5 Config Template missing' "$KRB5_TB" "$KRB5_T";
+compare-config 'KRB5 Config Template missing' "$SSHD_TB" "$SSHD_T";
 
 exit 0;
 
 # SSSD Config File: File will be auto copied if missing.
 
-# KRB5 Configuration Files
-if [[ ! -r $KRB5_T ]]; then
-	echo "KRB5 Config Template missing. Copying $KRB5_T config file to the /etc/ folder.";
-	/bin/cp ./templates/$(basename $KRB5_T) $KRB5_T;
-else
-	echo "ERROR: No KRB5 config file found in the templates folder.  Please create one before running the script once more."
-	exit 1;
-fi
-
-
-# SSHD Config Files
-if [[ ! -r $SSHD_T ]]; then
-	echo "SSHD Config Template missing. Copying $SSHD_T config file to the /etc/ folder.";
-	/bin/cp ./templates/$(basename $SSHD_T) $SSHD_T;
-else
-	echo "ERROR: No SSHD config file found in the templates folder.  Please create one before running the script once more.";
-	exit 1;
-fi
-
-
 # Systemd Auto Net startup script.
 if [[ ! -r $SYSDAUTONET ]]; then
-	echo "Systemd Auto Net startup file was missing.  Copying $(basename $SYSDAUTONET) to $SYSDAUTONET .";
-	/bin/cp ./templates/$(basename $SYSDAUTONET);
-	systemctl enable @SYSDAUTONET;
-	systemctl daemon-reload;
+	if [[ ! -r ./templates/$(basename $SYSDAUTONET) ]]; then
+		echo "Systemd Auto Net startup file was missing.  Copying $(basename $SYSDAUTONET) to $SYSDAUTONET .";
+		/bin/cp ./templates/$(basename $SYSDAUTONET);
+		systemctl enable @SYSDAUTONET;
+		systemctl daemon-reload;
+	else
+		echo "File ./templates/$(basename $SYSDAUTONET) was not readable.  Exiting";
+		exit 1;
+	fi
 
 else
 	echo "ERROR: No Systemd template found.  Please create one before running the script once more.";
