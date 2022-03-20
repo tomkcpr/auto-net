@@ -16,8 +16,13 @@
 #
 #
 
+# Template Folder
+TEMPLATEF="./templates";
+
 # LAB DNS List
-LDNS=( 192.168.0.224 192.168.0.44 192.168.0.45 192.168.0.154 192.168.0.155 );
+LDNS=( 192.168.0.224 192.168.0.46 192.168.0.51 );
+STRDNS="192.168.0.224 192.168.0.46 192.168.0.51";
+
 
 INTNAME="ens192";
 
@@ -43,6 +48,11 @@ KRB5_TB=$(basename $KRB5_T);
 IPSUBNET=192.168.0.0/24;
 IPRANGE="192.168.0.100-192.168.0.255";
 
+NETGATEWAY="192.168.0.1";
+NETMASK="24"
+NETSEARCH="mds.xyz nix.mds.xyz mws.mds.xyz";
+NETDOMAIN="mds.xyz nix.mds.xyz mws.mds.xyz";
+
 # DHCP Client specific configuration parameter.
 PATH_DHCLIENT_CONF=/etc/dhcp/dhclient.conf;
 
@@ -66,6 +76,14 @@ IPACLIENTCREDFILE="/tmp/ipa-client-credentials";
 # Systemd config.
 SYSDAUTONET="/etc/systemd/system/auto-net.service";
 
+#
+OSVERSION=""
+
+osversion() 
+	grep -Ei "Rocky Linux.*8\." /etc/os-release 2>&1 >/dev/null && { OSVERSION="ROL8"; }
+	grep -Ei "CentOS Linux.*7" /etc/os-release 2>&1 >/dev/null && { OSVERSION="COL7"; }
+}
+osversion;
 
 usage() {
 	echo "Usage: $0 [-n <"NS LIST"> ] [-d "<DOMAIN>" ]" 1>&2;
@@ -489,20 +507,38 @@ while [[ true ]]; do
 	}
 
 	# Create the static configuration file ifcfg-$INTNAME using the 1) IP and 2) hostname derived above.
-	awk 'BEGIN {
-	                IPADDR="'"$IPADDR"'";
-	                NHOSTNAME="'"$NHOSTNAME"'";
-	                NDOMAIN="'"$NDOMAIN"'";
-	        } {
-	                if ( $0 ~ /IPADDR/ ) {
-	                        $0="IPADDR="IPADDR;
-	                }
-
-	                if ( $0 ~ /HOSTNAME/ ) {
-	                        $0="HOSTNAME="NHOSTNAME"."NDOMAIN;
-	                }
-	                print $0;
-	        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
+	if [[ $OSVERSION == "ROL7" || $OSVERSION == "COL7" || $OSVERSION == "RHL7" ]]; then 
+		awk 'BEGIN {
+		                IPADDR="'"$IPADDR"'";
+		                NHOSTNAME="'"$NHOSTNAME"'";
+		                NDOMAIN="'"$NDOMAIN"'";
+		        } {
+		                if ( $0 ~ /IPADDR/ ) {
+		                        $0="IPADDR="IPADDR;
+		                }
+	
+		                if ( $0 ~ /HOSTNAME/ ) {
+		                        $0="HOSTNAME="NHOSTNAME"."NDOMAIN;
+		                }
+		                print $0;
+		        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
+	elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
+		nmcli con add \
+			con-name $INTNAME \
+			ifname $INTNAME \
+			type ethernet \
+			ip4 $IPADDR/$IPNETMASK \
+			gw4 $NETGATEWAY \
+			ipv4.method manual \
+			ipv4.dns "$STRDNS" \
+			connection.autoconnect yes \
+			ipv4.dns-search "$NETSEARCH"
+	
+	else
+		echo "ERROR: Unknown OS. Exiting.";
+		exit 1;
+		
+	fi
 
 	# -------------------------
 	# In the ifcfg-$INTNAME a few things are done.
@@ -534,7 +570,6 @@ done
 # ------------------------------------------------------------------------
 echo "Ok, we're going to do a bunch of changes to the system.  You have 5 seconds to backout by pressing CTRL + C to get out.";
 
-
 if [[ $APPLYCONFIG == "true" || $APPLYCONFIG == "yes" ]]; then
 	echo "NOACT: Not applying config as per the config file setting parameter APPLYCONFIG ($APPLYCONFIG).";
 	exit 0;
@@ -543,12 +578,38 @@ else
 fi
 
 
-cp -p $NCPATH/ifcfg-$INTNAME $NCPATH/_ifcfg-$INTNAME-backup-$(date +%s);
-mv $NCPATH/ifcfg-n-$INTNAME $NCPATH/ifcfg-$INTNAME;
+# Set resolv.conf first
+if [[ $TEMPLATEF != "" && -r $TEMPLATEF/resolv.conf-template ]]; then
+	echo "Backing up /etc/resolv.conf to /etc/resolv.conf-backup-01 and copying in $TEMPLATEF/resolv.conf-template to /etc/resolv.conf .";
+	/bin/cp -p /etc/resolv.conf /etc/resolv.conf-backup-01;
+	/bin/cp $TEMPLATEF/resolv.conf-template /etc/resolv.conf;
+else
+	echo "WARN: Skipping adjusting /etc/resolv.conf. By doing so, I'm assuming your existing config will work.";
+fi
 
-dhclient -r; dhclient -x;
+
 hostnamectl set-hostname $NHOSTNAME.$NDOMAIN;
-systemctl restart network;
+
+# Release the IP temporarily as we start up Networking with the permanently updated files.
+dhclient -r; dhclient -x;
+
+# Check version and initiate the network config.
+if [[ $OSVERSION == "ROL7" || $OSVERSION == "COL7" || $OSVERSION == "RHL7" ]]; then
+
+	cp -p $NCPATH/ifcfg-$INTNAME $NCPATH/_ifcfg-$INTNAME-backup-$(date +%s);
+	mv $NCPATH/ifcfg-n-$INTNAME $NCPATH/ifcfg-$INTNAME;
+
+	systemctl restart network;
+
+elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
+	nmcli con down $INTNAME;
+	nmcli con up $INTNAME;
+	nmcli con show $INTNAME;
+else
+	echo "WEIRD: This should have exited earlier if the OS version isn't one we support. ";
+	exit 1;
+fi
+
 
 [[ $(rpm -aq|grep -Ei ipa-client) == "" ]] && yum install ipa-client -y;
 [[ $(rpm -aq|grep -Ei authconfig) == "" ]] && yum install authconfig -y;
