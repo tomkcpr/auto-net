@@ -46,7 +46,7 @@ IPRANGE="192.168.0.100-192.168.0.255";
 # DHCP Client specific configuration parameter.
 PATH_DHCLIENT_CONF=/etc/dhcp/dhclient.conf;
 
-RETRIES=20;				# Number of times to try to get a unique IP.
+RETRIES=5;				# Number of times to try to get a unique IP.
 
 TMPIP="/tmp/.eDrsldDI.tmp";
 CONFIGFILE="./auto-net.conf";
@@ -217,6 +217,13 @@ fi
 # ------------------------------------------------------------------------------------
 
 
+# Set SELinux permissions.
+yum install policycoreutils-python-utils -y
+
+# Set SELinux permissions for common utilities, including DHCPD and dhclient.  Without these, SELinux will prevent execution.
+# This will take a while to execute so executing on the image is best.
+for SEPERM in $( echo NetworkManager_var_lib_t cluster_conf_t cluster_var_lib_t cluster_var_run_t dhcpc_state_t dhcpc_tmp_t dhcpc_var_run_t initrc_var_run_t net_conf_t root_t systemd_passwd_var_run_t virt_lxc_var_run_t virt_var_run_t ); do semanage permissive -a $SEPERM; done
+
 
 # Variables you've used are going to be printed below.
 echo "Variables you've used are: $NDOMAIN $UNDOMAIN $IPA01 $IPA02";
@@ -319,7 +326,7 @@ function nmap-subnet () {
 	fi
 
 
-	echo "RETV: $NMAPIP";
+	echo "RETV: $IPENTRY";
 }
 
 
@@ -373,7 +380,7 @@ while [[ true ]]; do
 
 	# Get the IP address assigned to $INTNAME by dhclient above. 
 	IPADDR=$(ip a|awk '{
-	        if ( $0 ~ /"'"$INTNAME"'"/ )
+	        if ( $0 ~ /'$INTNAME'/ )
 	                ETH=1;
 	        if ( $0 ~ /inet [0-9]/ && ETH == 1 ) {
 	                gsub (/\/.*/, "", $0 );
@@ -385,6 +392,8 @@ while [[ true ]]; do
 	echo "IPADDR = |$IPADDR|";
 	[[ -z $IPADDR ]] && {
 		echo "ERROR: No IP can be derived after running dhclient.  DHCPD is down?  Increase DHCPD timeouts? Exiting.";
+		echo "ERROR: Output of 'ip a' below:"
+		ip a
 		exit 0;
 	}
 
@@ -445,7 +454,7 @@ while [[ true ]]; do
 			yum install nmap netcat nmap-netcat -y
                 fi
 		RETV=$( nmap-subnet | awk '/RETV: /{ print $2; }' );
-		IPADDR = $RETV;
+		IPADDR="$RETV";
 	fi
 
 
