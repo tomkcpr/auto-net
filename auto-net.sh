@@ -49,7 +49,7 @@ IPSUBNET=192.168.0.0/24;
 IPRANGE="192.168.0.100-192.168.0.255";
 
 NETGATEWAY="192.168.0.1";
-NETMASK="24"
+IPNETMASK="24"
 NETSEARCH="mds.xyz nix.mds.xyz mws.mds.xyz";
 NETDOMAIN="mds.xyz nix.mds.xyz mws.mds.xyz";
 
