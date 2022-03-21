@@ -79,7 +79,7 @@ SYSDAUTONET="/etc/systemd/system/auto-net.service";
 #
 OSVERSION=""
 
-osversion() { 
+function osversion() { 
 	grep -Ei "Rocky Linux.*8\." /etc/os-release 2>&1 >/dev/null && { OSVERSION="ROL8"; }
 	grep -Ei "CentOS Linux.*7" /etc/os-release 2>&1 >/dev/null && { OSVERSION="COL7"; }
 }
