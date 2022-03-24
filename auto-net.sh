@@ -241,7 +241,7 @@ yum install policycoreutils-python-utils -y
 
 # Set SELinux permissions for common utilities, including DHCPD and dhclient.  Without these, SELinux will prevent execution.
 # This will take a while to execute so executing on the image is best.
-for SEPERM in $( echo NetworkManager_var_lib_t cluster_conf_t cluster_var_lib_t cluster_var_run_t dhcpc_state_t dhcpc_tmp_t dhcpc_var_run_t initrc_var_run_t net_conf_t root_t systemd_passwd_var_run_t virt_lxc_var_run_t virt_var_run_t ); do semanage permissive -a $SEPERM; done
+# for SEPERM in $( echo NetworkManager_var_lib_t cluster_conf_t cluster_var_lib_t cluster_var_run_t dhcpc_state_t dhcpc_tmp_t dhcpc_var_run_t initrc_var_run_t net_conf_t root_t systemd_passwd_var_run_t virt_lxc_var_run_t virt_var_run_t ); do semanage permissive -a $SEPERM; done
 
 
 # Variables you've used are going to be printed below.
