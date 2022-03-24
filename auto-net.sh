@@ -65,6 +65,7 @@ USERCONFIGFILE="";
 # SSSD Config files
 SSSDP_C=/etc/sssd/sssd.conf;
 SSSDP_T="$SSSDP_C-template";
+SSSDP_TB=$(basename $SSSDP_T);
 
 # SSHD Config files
 SSHD_C="/etc/ssh/sshd_config";
@@ -193,7 +194,8 @@ fi
 
 compare-config 'NIC Card Template missing' "$IFCFG_TB" "$IFCFG_T";
 compare-config 'KRB5 Config Template missing' "$KRB5_TB" "$KRB5_T";
-compare-config 'KRB5 Config Template missing' "$SSHD_TB" "$SSHD_T";
+compare-config 'SSHD Config Template missing' "$SSHD_TB" "$SSHD_T";
+compare-config 'SSSD Config Template missing' "$SSSDP_TB" "$SSSDP_T";
 
 # SSSD Config File: File will be auto copied if missing.
 
