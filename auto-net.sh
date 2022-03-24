@@ -648,7 +648,16 @@ echo "Checking for the krb5.conf template file.  If one exists, I'm going to rec
 }
 
 # Sync up the time.  If we don't, ssh to other servers won't work well.
-ping -c 1 $IPA01 >/dev/null 2>&1 && { ntpdate -u $IPA01; } || { ntpdate -u $IPA02; };
+if [[ $OSVERSION == "ROL8" ]]; then
+	systemctl stop chronyd; 
+	ping -c 1 $IPA01 >/dev/null 2>&1 && { chronyd -q 'server $IPA01 iburst'; } || { chronyd -q 'server $IPA02 iburst'; };
+	systemctl start chronyd;
+else
+	systemctl stop ntpd; 
+	ping -c 1 $IPA01 >/dev/null 2>&1 && { ntpdate -u $IPA01; } || { ntpdate -u $IPA02; }; 
+	systemctl start ntpd;
+fi
+
 hwclock --adjust;
 
 # Add auto mount for NFS home directories.
