@@ -526,7 +526,7 @@ while [[ true ]]; do
 		                print $0;
 		        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
 	elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
-		if [[ $( nmcli c show | grep -Ei "$INTNAME" ) != "" ]]; then
+		if [[ $( nmcli c show | grep -Ei "$INTNAME" ) == "" ]]; then
 			nmcli con add \
 				con-name $INTNAME \
 				ifname $INTNAME \
