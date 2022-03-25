@@ -243,7 +243,7 @@ yum install policycoreutils-python-utils -y
 
 # Set SELinux permissions for common utilities, including DHCPD and dhclient.  Without these, SELinux will prevent execution.
 # This will take a while to execute so executing on the image is best.
-for SEPERM in $( echo NetworkManager_var_lib_t cluster_conf_t cluster_var_lib_t cluster_var_run_t dhcpc_state_t dhcpc_tmp_t dhcpc_var_run_t initrc_var_run_t net_conf_t root_t systemd_passwd_var_run_t virt_lxc_var_run_t virt_var_run_t ); do semanage permissive -a $SEPERM; done
+# for SEPERM in $( echo NetworkManager_var_lib_t cluster_conf_t cluster_var_lib_t cluster_var_run_t dhcpc_state_t dhcpc_tmp_t dhcpc_var_run_t initrc_var_run_t net_conf_t root_t systemd_passwd_var_run_t virt_lxc_var_run_t virt_var_run_t ); do semanage permissive -a $SEPERM; done
 
 
 # Variables you've used are going to be printed below.
@@ -526,16 +526,20 @@ while [[ true ]]; do
 		                print $0;
 		        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
 	elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
-		nmcli con add \
-			con-name $INTNAME \
-			ifname $INTNAME \
-			type ethernet \
-			ip4 $IPADDR/$IPNETMASK \
-			gw4 $NETGATEWAY \
-			ipv4.method manual \
-			ipv4.dns "$STRDNS" \
-			connection.autoconnect yes \
-			ipv4.dns-search "$NETSEARCH"
+		if [[ $( nmcli c show | grep -Ei "$INTNAME" ) != "" ]]; then
+			nmcli con add \
+				con-name $INTNAME \
+				ifname $INTNAME \
+				type ethernet \
+				ip4 $IPADDR/$IPNETMASK \
+				gw4 $NETGATEWAY \
+				ipv4.method manual \
+				ipv4.dns "$STRDNS" \
+				connection.autoconnect yes \
+				ipv4.dns-search "$NETSEARCH"
+		else
+			echo "WARNING: INT $INTNAME already existed ( nmcli c show )."
+		fi
 	
 	else
 		echo "ERROR: Unknown OS. Exiting.";
@@ -614,9 +618,10 @@ else
 fi
 
 
-[[ $(rpm -aq|grep -Ei ipa-client) == "" ]] && yum install ipa-client -y;
-[[ $(rpm -aq|grep -Ei authconfig) == "" ]] && yum install authconfig -y;
+[[ $(rpm -aq|grep -Ei ipa-client) == "" || $(which authconfig) == "" ]] && yum install ipa-client -y;
+[[ $(rpm -aq|grep -Ei authconfig) == "" || $(which authconfig) == "" ]] && yum install authconfig -y;
 
+# If packages exist.
 yum update ipa-client -y;
 yum update authconfig -y;
 yum update sssd -y;
