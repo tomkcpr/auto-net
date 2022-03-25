@@ -559,10 +559,24 @@ while [[ true ]]; do
 		echo "ERROR: This hosts hostname matches it's intended future name, therefore no change is needed.";
 		rm -f $NCPATH/ifcfg-n-$INTNAME;
 
+		# Check if only host is missing.
+		for KEY in $( awk '{ if ( $1 ~ /nameserver/ ) print $2 }' < /etc/resolv.conf ); do 
+			nslookup $NHOSTNAME.$NDOMAIN >/dev/null; 
+			if [[ $? != 1 ]]; then 
+				echo "DONE: Host exists in the DNS.  Exiting.  No action needed.";
+				exit 0;
+			fi
+		done
+
+
 		if echo "$HOSTEXISTS" | grep -Ei template 2>&1 >/dev/null; then
 			echo "ERROR: This hosts hostname contains the word 'template' which matches it's intended name.  Exiting as a result since we consider this host as complete in this scenario.";
 			exit 0;
 		fi
+
+		# No DNS entry for this host exists. But unique IP does.  Meaning Unique IP should be added and DNS entry set.  Ready to break out.
+		break;
+
 	else
 		break;
 	fi
