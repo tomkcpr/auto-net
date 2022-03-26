@@ -526,8 +526,8 @@ while [[ true ]]; do
 		                print $0;
 		        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
 	elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
-		if [[ $( nmcli c show | grep -Ei "$INTNAME" ) == "" ]]; then
-			nmcli con add \
+		if [[ $( nmcli -t c show | grep -Ei "$INTNAME" ) == "" ]]; then
+			nmcli -t con add \
 				con-name $INTNAME \
 				ifname $INTNAME \
 				type ethernet \
@@ -625,7 +625,7 @@ if [[ $OSVERSION == "ROL7" || $OSVERSION == "COL7" || $OSVERSION == "RHL7" ]]; t
 elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
 	nmcli con down $INTNAME;
 	nmcli con up $INTNAME;
-	nmcli con show $INTNAME;
+	nmcli -t con show $INTNAME;
 else
 	echo "WEIRD: This should have exited earlier if the OS version isn't one we support. ";
 	exit 1;
@@ -671,7 +671,7 @@ echo "Checking for the krb5.conf template file.  If one exists, I'm going to rec
 # Sync up the time.  If we don't, ssh to other servers won't work well.
 if [[ $OSVERSION == "ROL8" ]]; then
 	systemctl stop chronyd; 
-	ping -c 1 $IPA01 >/dev/null 2>&1 && { chronyd -q 'server $IPA01 iburst'; } || { chronyd -q 'server $IPA02 iburst'; };
+	ping -c 1 $IPA01 >/dev/null 2>&1 && { chronyd -q 'server $IPA01 iburst' -t 10; } || { chronyd -q 'server $IPA02 iburst' -t 10; };
 	systemctl start chronyd;
 else
 	systemctl stop ntpd; 
