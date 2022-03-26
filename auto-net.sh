@@ -536,6 +536,7 @@ while [[ true ]]; do
 				ipv4.method manual \
 				ipv4.dns "$STRDNS" \
 				connection.autoconnect yes \
+				802-3-ethernet.mac-address $(cat /sys/class/net/ens192/address) \
 				ipv4.dns-search "$NETSEARCH"
 		else
 			echo "WARNING: INT $INTNAME already existed ( nmcli c show )."
