@@ -376,7 +376,7 @@ while [[ true ]]; do
 	# Remove the leases file to guarantee we will get a unique IP address on another attempt.
 	rm -f /var/lib/dhclient/*leases;
 
-	# Determine if we have a 1) temporary IP assigned, 2) our hostname contains 'template' in the name.
+	# Determine if we already have a temporary IP assigned ( Perhaps NetworkManager had it assigned. )
 	EIPADDR=$(ip a|awk -v intname=$INTNAME '{
 	        if ( $0 ~ /"'"$INTNAME"'"/ )
 	                ETH=1;
@@ -386,36 +386,42 @@ while [[ true ]]; do
 	                ETH=0;
 	        }}'|head -n 1);
 
-	# Retrieve the temporary IP address set on the template.
-	TIPADDR=$( grep -Ei 999 $IFCFG_T | grep IPADDR );
+
+	# C/R/A 7 Logic
+	if [[ $OSVERSION == "ROL7" || $OSVERSION == "COL7" || $OSVERSION == "RHL7" ]]; then
+		# Retrieve the temporary IP address set on the template.
+		TIPADDR=$( grep -Ei 999 $IFCFG_T | grep IPADDR );
 
 
-	#
-	# If a) our temporary address is assigned or 
-	#    b) temporary NIC config (IFCFG_T) is not empty (meaning host config was not completed) or
-	#    c) there is no IP assigned and and the hostname contains 'template'
-	# then attempt to get another IP. 
-	#
-	[[ ( ! -z $TIPADDR || -r $IFCFG_T )  || ( -z $EIPADDR && $(hostname|grep -Ei "template") != "" ) ]] && {
+		#
+		# If a) our temporary address is assigned or 
+		#    b) temporary NIC config (IFCFG_T) is not empty (meaning host config was not completed) or
+		#    c) there is no IP assigned and the hostname contains 'template'
+		# then attempt to get another IP. 
+		#
+		if [[ ( ! -z $TIPADDR || -r $IFCFG_T )  || ( -z $EIPADDR && $(hostname|grep -Ei "template") != "" ) ]]; then
 
-		# Logic below impeded unique IP assignment.  Removing for now.
-	        # ifdown $INTNAME;
-		# rm -f /var/lib/dhclient/*leases;
-		# ifup $INTNAME;
+			echo "PATH_DHCLIENT_CONF = $PATH_DHCLIENT_CONF";
+			dhclient -v;		
 
-		echo "PATH_DHCLIENT_CONF = $PATH_DHCLIENT_CONF";
-		dhclient -v;				# <-------------------<  HERE HERE <-------------------<
-	} || { 
-		echo "WARNING: Looks like host already had an IP address so must be on the network.  Not running dhclient again."; 
-	};
+		else
+			echo "WARNING: Looks like host already had an IP address so must be on the network.  Not running dhclient again."; 
+		fi
+	else
+		# Stop and restart the dhclient on C/R/A 8.
+		echo "R/C/R/A 8 or equivalent. Running dhclient to get unique IP..."
+		dhclient -r -x;
+		dhclient -v;
+	fi
 
-	# Get the IP address assigned to $INTNAME by dhclient above. 
+
+	# Get the NEW IP address assigned to $INTNAME by dhclient above. 
 	IPADDR=$(ip a|awk '{
 	        if ( $0 ~ /'$INTNAME'/ )
 	                ETH=1;
 	        if ( $0 ~ /inet [0-9]/ && ETH == 1 ) {
 	                gsub (/\/.*/, "", $0 );
-	                print $2;
+			print $2;
 	                ETH=0;
 	        }}'|head -n 1);
 
@@ -469,7 +475,7 @@ while [[ true ]]; do
 				fi
 			fi
 
-			# Save invalid IP in a text file for future lookup.
+			# Create TMPIP file to determine how many attempts we've exhausted trying to find a valid IP.
 			echo $IPADDR >> $TMPIP;
 
 			continue;
@@ -491,11 +497,12 @@ while [[ true ]]; do
 
 	# If we still have no IP, exit.
 	if [[ -z "$IPADDR" ]]; then
+		echo "ERROR: Tried to get an IP via 1) dhcp client and 2) nmap without success.  Perhaps there is no more IP's left on this VLAN?";
 		exit 0;
 	fi
 
 
-	echo "Unique IP: $IPADDR";
+	echo "SUCCESS: Unique IP address is: $IPADDR";
 
 	# Get the new hostname defined in the VM properties.
 	NHOSTNAME=$(vmtoolsd --cmd 'info-get guestinfo.ovfEnv'|awk '{
