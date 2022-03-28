@@ -242,6 +242,11 @@ fi
 
 # ------------------------------------------------------------------------------------
 
+# Delete all previous connections.  Setup a clean slate.
+for NICNAME in $(nmcli -t c s | awk -F: '{ if ( $0 ! ~ /NAME/ ) print $2 }'); do
+	nmcli c delete $NICNAME;
+done
+
 
 # Set SELinux permissions.
 yum install policycoreutils-python-utils -y
@@ -531,6 +536,7 @@ while [[ true ]]; do
 		                print $0;
 		        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
 	elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
+
 		if [[ $( nmcli -t c show | grep -Ei "$INTNAME" ) == "" ]]; then
 			nmcli -t con add \
 				con-name $INTNAME \
