@@ -712,7 +712,7 @@ override_homedir = /n/%d/%u
 # ldap_user_home_directory = unixHomeDirectory
 SSSD-END
 
-[[ $(grep -Ei "dyndns_update = True|dyndns_update_ptr = True|ldap_schema = ad|ldap_id_mapping = True|override_homedir = /n/%d/%u" $SSSDP ) == "" ]] && {
+[[ $(grep -Ei "dyndns_update = True|dyndns_update_ptr = True|ldap_schema = ad|ldap_id_mapping = True|override_homedir = /n/%d/%u" $SSSDP_C ) == "" ]] && {
         awk 'BEGIN {
                 STAG="";
         }
