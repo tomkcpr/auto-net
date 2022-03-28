@@ -624,6 +624,7 @@ if [[ $OSVERSION == "ROL7" || $OSVERSION == "COL7" || $OSVERSION == "RHL7" ]]; t
 	systemctl restart network;
 
 elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
+	systemctl restart NetworkManager;			#  A must.  Otherwise this doesn't detect the NIC. Appears NM doesn't update itself.
 	nmcli con down $INTNAME;
 	nmcli con up $INTNAME;
 	nmcli -t con show $INTNAME;
