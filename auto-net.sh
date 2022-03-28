@@ -371,7 +371,8 @@ IPCNT=0;
 while [[ true ]]; do
 
 	# Exit or end any dhclients already running in memory.
-	dhclient -r; dhclient -x;
+	dhclient -r 2>/dev/null;			# Attempts to look in /etc/sysconfig/network-scripts/ifcfg-*. Hence /dev/null
+	dhclient -x 2>/dev/null;
 
 	# Remove the leases file to guarantee we will get a unique IP address on another attempt.
 	rm -f /var/lib/dhclient/*leases;
