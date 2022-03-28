@@ -192,7 +192,12 @@ fi
 # Configure the templates if missing.
 # ------------------------------------------------------------------------------------
 
-compare-config 'NIC Card Template missing' "$IFCFG_TB" "$IFCFG_T";
+if [[ $OSVERSION == "ROL7" || $OSVERSION == "COL7" || $OSVERSION == "RHL7" ]]; then
+	compare-config 'NIC Card Template missing' "$IFCFG_TB" "$IFCFG_T";
+else
+	echo "NOTE: Not distributing $IFCFG_TB.  Not a RHEL, CentOS, Rocky or Alma Linux 7 OS.";
+fi
+
 compare-config 'KRB5 Config Template missing' "$KRB5_TB" "$KRB5_T";
 compare-config 'SSHD Config Template missing' "$SSHD_TB" "$SSHD_T";
 compare-config 'SSSD Config Template missing' "$SSSDP_TB" "$SSSDP_T";
