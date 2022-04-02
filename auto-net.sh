@@ -251,6 +251,12 @@ done
 
 # Set SELinux permissions.
 yum install policycoreutils-python-utils -y
+if [[ $? != 0 ]]; then
+	echo "ERROR: Yum install failed to install policycoreutils-python-utils  ...";
+	exit 1;
+else
+	echo "policycoreutils-python-utils installed successfully. ";
+fi
 
 # Set SELinux permissions for common utilities, including DHCPD and dhclient.  Without these, SELinux will prevent execution.
 # This will take a while to execute so executing on the image is best.
