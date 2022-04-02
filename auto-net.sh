@@ -672,6 +672,8 @@ yum update sssd -y;
 
 # Get temp pa$$.
 TMPP=$(cat $IPACLIENTCREDFILE);
+rm -f $IPACLIENTCREDFILE;
+
 
 ipa-client-install --uninstall;
 ipa-client-install --force-join -p autojoin -w "$TMPP" --fixed-primary --server=$IPA01.$NDOMAIN --server=$IPA02.$NDOMAIN --domain=$NDOMAIN --realm=$UNDOMAIN -U
