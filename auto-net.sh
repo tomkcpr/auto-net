@@ -293,7 +293,7 @@ function nmap-subnet () {
 	# If you're here, DHCPD has failed to get a unique IP that isn't listed in one of the DNS servers.  So we'll sniff for one.
 
 	# We need to be on the network before NMAP can get a list of available IP's.  This IP will only be temporarilly assigned.
-	dhclient -r; dhclient -x; dhclient -v;
+	dhclient -r 2>/dev/null; dhclient -x 2>/dev/null; dhclient -v 2>/dev/null;
 
 	NMAPTMP="/tmp/.dkdiISKDJwjsdw.tmp";
 	nmap -v -sn -n $IPSUBNET -oG -|awk '/Down/ { print $0; }' > $NMAPTMP;
@@ -411,8 +411,8 @@ while [[ true ]]; do
 	else
 		# Stop and restart the dhclient on C/R/A 8.
 		echo "R/C/R/A 8 or equivalent. Running dhclient to get unique IP..."
-		dhclient -r -x;
-		dhclient -v;
+		dhclient -r -x 2>/dev/null;
+		dhclient -v 2>/dev/null;
 	fi
 
 
@@ -462,8 +462,8 @@ while [[ true ]]; do
 
 			# Sleep a bit if we still can't get an IP after 5 tries.
 			if [[ $IPCNT -ge 3 ]]; then
-				dhclient -r; 
-				dhclient -x;
+				dhclient -r 2>/dev/null; 
+				dhclient -x 2>/dev/null;
 
 				# Logic below actually impeded unique IP assignment.  Removing for now.
 				# rm -f /var/lib/dhclient/dhclient.leases;
@@ -632,7 +632,8 @@ fi
 hostnamectl set-hostname $NHOSTNAME.$NDOMAIN;
 
 # Release the IP temporarily as we start up Networking with the permanently updated files.
-dhclient -r; dhclient -x;
+dhclient -r 2>/dev/null; 
+dhclient -x 2>/dev/null;
 
 # Check version and initiate the network config.
 if [[ $OSVERSION == "ROL7" || $OSVERSION == "COL7" || $OSVERSION == "RHL7" ]]; then
