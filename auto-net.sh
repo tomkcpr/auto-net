@@ -243,7 +243,8 @@ fi
 # ------------------------------------------------------------------------------------
 
 # Delete all previous connections.  Setup a clean slate.
-for NICNAME in $(nmcli -t c s | awk -F: '{ if ( $0 ! ~ /NAME/ ) print $2 }'); do
+for NICNAME in $(nmcli -t c s | awk -F: '{ if ( $0 !~ /NAME/ ) print $2 }'); do
+	echo "Deleting $NICNAME to clean up all previous connections ... ";
 	nmcli c delete $NICNAME;
 done
 
