@@ -243,6 +243,11 @@ fi
 # ------------------------------------------------------------------------------------
 
 
+echo "Listed connection devices (nmcli -t cs )";
+echo "Connections:     "$(nmcli -t c s);
+echo "Connections(-t): "$(nmcli -t c s $INTNAME);
+
+
 # Set SELinux permissions.
 yum install policycoreutils-python-utils -y
 if [[ $? != 0 ]]; then
