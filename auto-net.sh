@@ -242,12 +242,6 @@ fi
 
 # ------------------------------------------------------------------------------------
 
-# Delete all previous connections.  Setup a clean slate.
-for NICNAME in $(nmcli -t c s | awk -F: '{ if ( $0 !~ /NAME/ ) print $2 }'); do
-	echo "Deleting $NICNAME to clean up all previous connections ... ";
-	nmcli c delete $NICNAME;
-done
-
 
 # Set SELinux permissions.
 yum install policycoreutils-python-utils -y
@@ -552,7 +546,17 @@ while [[ true ]]; do
 		        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
 	elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
 
+
+		# Delete all previous connections.  Setup a clean slate.
+		for NICNAME in $(nmcli -t c s | awk -F: '{ if ( $0 !~ /NAME/ ) print $2 }'); do
+			echo "Deleting $NICNAME to clean up all previous connections ... ";
+			nmcli c delete $NICNAME;
+		done
+
+
+		# No network connections should be present at this point.
 		if [[ $( nmcli -t c show | grep -Ei "$INTNAME" ) == "" ]]; then
+
 			nmcli -t con add \
 				con-name $INTNAME \
 				ifname $INTNAME \
@@ -564,6 +568,7 @@ while [[ true ]]; do
 				connection.autoconnect yes \
 				802-3-ethernet.mac-address $(cat /sys/class/net/ens192/address) \
 				ipv4.dns-search "$NETSEARCH"
+
 		else
 			echo "WARNING: INT $INTNAME already existed ( nmcli c show )."
 		fi
@@ -665,9 +670,8 @@ fi
 [[ $(rpm -aq|grep -Ei authconfig) == "" || $(which authconfig) == "" ]] && yum install authconfig -y;
 
 # If packages exist.
-yum update ipa-client -y;
-yum update authconfig -y;
-yum update sssd -y;
+yum install ipa-client authconfig sssd -y;
+yum update ipa-client authconfig sssd -y;
 
 
 # Check if temporary password file exists with our credentials.  Exit if not.
