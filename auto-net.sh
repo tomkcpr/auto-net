@@ -539,6 +539,41 @@ while [[ true ]]; do
 	}');
 
 
+	# -------------------------
+	# In the ifcfg-$INTNAME a few things are done.
+	# 1) PEERDNS=no  -  This causes many extra nameservers to be added to /etc/resolv.conf.  Need to disable this or it will
+	#                   affect if we can ssh between hosts using the short names after we are added to FreeIPA / KDC.
+	# 
+
+	IPAEXISTS=$(dig -x $IPADDR | grep -Ei "PTR"|grep -Evi "^;"|awk '{ print $NF }'|sed -e "s/[.]$//g")
+	HOSTEXISTS=$( hostnamectl | grep -Ei "$NHOSTNAME[.]$NDOMAIN" );
+	if [[ $IPAEXISTS != "" || $HOSTEXISTS != "" ]]; then
+		echo "ERROR: This hosts hostname matches it's intended future name, therefore no change is needed.";
+		rm -f $NCPATH/ifcfg-n-$INTNAME;
+
+		# Check if only host is missing.
+		for KEY in $( awk '{ if ( $1 ~ /nameserver/ ) print $2 }' < /etc/resolv.conf ); do 
+			nslookup $NHOSTNAME.$NDOMAIN >/dev/null; 
+			if [[ $? != 1 ]]; then 
+				echo "DONE: Host exists in the DNS.  Exiting.  No action needed.";
+				exit 0;
+			fi
+		done
+
+
+		if echo "$HOSTEXISTS" | grep -Ei template 2>&1 >/dev/null; then
+			echo "ERROR: This hosts hostname contains the word 'template' which matches it's intended name or the template has been booted up.  Exiting as a result since we consider this host as complete in this scenario.";
+			exit 0;
+		fi
+
+		# No DNS entry for this host exists. But unique IP does.  Meaning Unique IP should be added and DNS entry set.  Ready to break out.
+		break;
+
+	else
+		break;
+	fi
+
+
 	# Check if any work needs to be done.
 	[[ $(echo $HOSTNAME | grep -Ei $NHOSTNAME) != "" && $IPVERIFY == "VALID" ]] && {
 		echo "COMPLETE: Hostname matches required VM hostname and IP is valid.  Nothing to do.  Exiting.";
@@ -549,7 +584,7 @@ while [[ true ]]; do
 
 	# Check that we actually got a hostname from the VM.  Exit if we didn't.
 	[[ $NHOSTNAME == "" || $( echo "$NHOSTNAME" | grep -Ei "template" ) != "" ]]  && { 
-		echo "ERROR: Hostname is still set to something with word template in it or it is blank.  In other words, could not get hostname using vmtoolsd from the Options - Properties - GuestHostname variable of the VM.  Exiting.";
+		echo "ERROR: VMware hostname is still set to something with word template in it or it is blank.  In other words, could not get hostname using vmtoolsd from the Options - Properties - GuestHostname variable of the VM.  Exiting.";
 		exit 0;
 	} || {
 		echo "Hostname: $NHOSTNAME , IP Address: $IPADDR";
@@ -632,40 +667,6 @@ while [[ true ]]; do
 		echo "ERROR: Unknown OS. Exiting.";
 		exit 1;
 		
-	fi
-
-	# -------------------------
-	# In the ifcfg-$INTNAME a few things are done.
-	# 1) PEERDNS=no  -  This causes many extra nameservers to be added to /etc/resolv.conf.  Need to disable this or it will
-	#                   affect if we can ssh between hosts using the short names after we are added to FreeIPA / KDC.
-	# 
-
-	IPAEXISTS=$(dig -x $IPADDR | grep -Ei "PTR"|grep -Evi "^;"|awk '{ print $NF }'|sed -e "s/[.]$//g")
-	HOSTEXISTS=$( hostnamectl | grep -Ei "$NHOSTNAME[.]$NDOMAIN" );
-	if [[ $IPAEXISTS != "" || $HOSTEXISTS != "" ]]; then
-		echo "ERROR: This hosts hostname matches it's intended future name, therefore no change is needed.";
-		rm -f $NCPATH/ifcfg-n-$INTNAME;
-
-		# Check if only host is missing.
-		for KEY in $( awk '{ if ( $1 ~ /nameserver/ ) print $2 }' < /etc/resolv.conf ); do 
-			nslookup $NHOSTNAME.$NDOMAIN >/dev/null; 
-			if [[ $? != 1 ]]; then 
-				echo "DONE: Host exists in the DNS.  Exiting.  No action needed.";
-				exit 0;
-			fi
-		done
-
-
-		if echo "$HOSTEXISTS" | grep -Ei template 2>&1 >/dev/null; then
-			echo "ERROR: This hosts hostname contains the word 'template' which matches it's intended name.  Exiting as a result since we consider this host as complete in this scenario.";
-			exit 0;
-		fi
-
-		# No DNS entry for this host exists. But unique IP does.  Meaning Unique IP should be added and DNS entry set.  Ready to break out.
-		break;
-
-	else
-		break;
 	fi
 
 done
