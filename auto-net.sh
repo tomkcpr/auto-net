@@ -547,11 +547,6 @@ while [[ true ]]; do
 	}
 								   
 
-	[[ $(echo $HOSTNAME | grep -Ei $NHOSTNAME) != "" && $IPVERIFY == "VALID" ]] {
-	} || {
-	}
-
-
 	# Check that we actually got a hostname from the VM.  Exit if we didn't.
 	[[ $NHOSTNAME == "" || $( echo "$NHOSTNAME" | grep -Ei "template" ) != "" ]]  && { 
 		echo "ERROR: Hostname is still set to something with word template in it or it is blank.  In other words, could not get hostname using vmtoolsd from the Options - Properties - GuestHostname variable of the VM.  Exiting.";
