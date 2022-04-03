@@ -551,6 +551,8 @@ while [[ true ]]; do
 		        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
 	elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
 
+		# Deactivate dhclient
+		dhclient -r -x 2>/dev/null;
 
 		# Delete all previous connections.  Setup a clean slate.
 		for NICNAME in $(nmcli -t c s | awk -F: '{ if ( $0 !~ /NAME/ ) print $2 }'); do
