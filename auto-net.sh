@@ -519,6 +519,39 @@ while [[ true ]]; do
 	                print;
 	        }}');
 
+	# Check if hostname is already set, meaning, system is already configured.
+	IPVERIFY=$(nmcli -t c s ens192 | awk -F: '{ 
+		if ( $1 ~ /IP4.ADDRESS/ ) { 
+			FIPADDR=$2; 
+			gsub(/\//, " ", $2); 
+			gsub(/\./, " ", $2); 
+			iptotal = 0; 
+			nume=split($2, ipaddr, / /); 
+			for ( ipentry in ipaddr ) { 
+				if ( ( ( ipaddr[ipentry] > 0 && iptotal == 0 ) || ( ipaddr[ipentry] >= 0 && iptotal > 0 ) ) && 
+					( ( ipaddr[ipentry] < 256 && ipentry < nume ) || ( ipaddr[ipentry] < 32 && ipentry = nume ) ) ) { 
+					iptotal++; 
+				}; 
+			} 
+
+			if ( iptotal == 5 ) print "VALID"; 
+		} 
+	}');
+
+
+	# Check if any work needs to be done.
+	[[ $(echo $HOSTNAME | grep -Ei $NHOSTNAME) != "" && $IPVERIFY == "VALID" ]] && {
+		echo "COMPLETE: Hostname matches required VM hostname and IP is valid.  Nothing to do.  Exiting.";
+	} || {
+		echo "CONTINUE: Host needs to be configured. Proceeding";
+	}
+								   
+
+	[[ $(echo $HOSTNAME | grep -Ei $NHOSTNAME) != "" && $IPVERIFY == "VALID" ]] {
+	} || {
+	}
+
+
 	# Check that we actually got a hostname from the VM.  Exit if we didn't.
 	[[ $NHOSTNAME == "" || $( echo "$NHOSTNAME" | grep -Ei "template" ) != "" ]]  && { 
 		echo "ERROR: Hostname is still set to something with word template in it or it is blank.  In other words, could not get hostname using vmtoolsd from the Options - Properties - GuestHostname variable of the VM.  Exiting.";
