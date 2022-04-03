@@ -550,12 +550,34 @@ while [[ true ]]; do
 		                print $0;
 		        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
 	elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
-
+		
+		# Turn off dhclient prior to removing interfaces.  
+		dhclient -r -x 2>/dev/null;
 
 		# Delete all previous connections.  Setup a clean slate.
-		for NICNAME in $(nmcli -t c s | awk -F: '{ if ( $0 !~ /NAME/ ) print $2 }'); do
-			echo "Deleting $NICNAME to clean up all previous connections ... ";
-			nmcli c delete $NICNAME;
+		MAXRETRY=5;
+		REPEATRM=0;
+		while [[ true ]]; do
+			for NICNAME in $(nmcli -t c s | awk -F: '{ if ( $0 !~ /NAME/ ) print $2 }'); do
+				echo "Deleting $NICNAME to clean up all previous connections ... ";
+				nmcli c delete $NICNAME;
+			done
+
+			# Check if connections exist.
+			sleep 1;
+			if [[ $( nmcli -t c show | grep -Ei "$INTNAME" ) != "" || $REPEATRM -gt $MAXRETRY ]]; then
+				continue;
+				REPEATRM=$(( $REPEATRM + 1 ));
+			else
+				if [[ $REPEATRM -gt $MAXRETRY ]]; then
+					echo "ERROR: Tried to delete $INTNAME 5 times.  No luck.  Interfaces still exist.  Exiting."
+					exit 1;
+				else
+					echo "SUCCESS: Interfaces $INTNAME deleted.";
+				fi
+
+				break;
+			fi	
 		done
 
 
