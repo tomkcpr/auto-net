@@ -552,6 +552,9 @@ while [[ true ]]; do
 	if hostnamectl | grep -Ei template 2>&1 >/dev/null; then
 		echo "ERROR: This hosts hostname contains the word 'template' which matches it's intended name or the template has been booted up.  Exiting as a result since we consider this host out of scope of a build in this scenario.";
 
+		# Turn off dhclient, if on.
+		dhclient -r -x 2>/dev/null;
+
 		# Disable the service from running again.  
 		systemctl disable auto-net;
 		exit 0;
