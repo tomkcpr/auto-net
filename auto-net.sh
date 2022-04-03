@@ -545,6 +545,10 @@ while [[ true ]]; do
 	#                   affect if we can ssh between hosts using the short names after we are added to FreeIPA / KDC.
 	# 
 
+	IPAEXISTS=$(dig -x $IPADDR | grep -Ei "PTR"|grep -Evi "^;"|awk '{ print $NF }'|sed -e "s/[.]$//g")
+	HOSTEXISTS=$( hostnamectl | grep -Ei "$NHOSTNAME[.]$NDOMAIN" );
+
+	# Exit if hosts name includes the word template.
 	if echo "$HOSTEXISTS" | grep -Ei template 2>&1 >/dev/null; then
 		echo "ERROR: This hosts hostname contains the word 'template' which matches it's intended name or the template has been booted up.  Exiting as a result since we consider this host out of scope of a build in this scenario.";
 		exit 0;
@@ -552,8 +556,7 @@ while [[ true ]]; do
 		echo "PROCEEDING: Hostname did not have the word template in it.";
 	fi
 
-	IPAEXISTS=$(dig -x $IPADDR | grep -Ei "PTR"|grep -Evi "^;"|awk '{ print $NF }'|sed -e "s/[.]$//g")
-	HOSTEXISTS=$( hostnamectl | grep -Ei "$NHOSTNAME[.]$NDOMAIN" );
+	# Additional checks if this host exists.  Exit if traces of this host exist.
 	if [[ $IPAEXISTS != "" || $HOSTEXISTS != "" ]]; then
 		echo "ERROR: This hosts hostname matches it's intended future name, therefore no change is needed.";
 		rm -f $NCPATH/ifcfg-n-$INTNAME;
