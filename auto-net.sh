@@ -550,8 +550,8 @@ while [[ true ]]; do
 		                print $0;
 		        }' < $NCPATH/ifcfg-$INTNAME > $NCPATH/ifcfg-n-$INTNAME;
 	elif [[ $OSVERSION == "ROL8" || $OSVERSION == "COL8" || $OSVERSION == "RHL8" ]]; then
-		
-		# Turn off dhclient prior to removing interfaces.  
+
+		# Deactivate dhclient.  Keeps the interface from reappearing while we are trying to get RID of them.
 		dhclient -r -x 2>/dev/null;
 
 		# Delete all previous connections.  Setup a clean slate.
