@@ -549,7 +549,7 @@ while [[ true ]]; do
 	HOSTEXISTS=$( hostnamectl | grep -Ei "$NHOSTNAME[.]$NDOMAIN" );
 
 	# Exit if hosts name includes the word template.
-	if echo "$HOSTEXISTS" | grep -Ei template 2>&1 >/dev/null; then
+	if hostnamectl | grep -Ei template 2>&1 >/dev/null; then
 		echo "ERROR: This hosts hostname contains the word 'template' which matches it's intended name or the template has been booted up.  Exiting as a result since we consider this host out of scope of a build in this scenario.";
 		exit 0;
 	else
