@@ -545,6 +545,13 @@ while [[ true ]]; do
 	#                   affect if we can ssh between hosts using the short names after we are added to FreeIPA / KDC.
 	# 
 
+	if echo "$HOSTEXISTS" | grep -Ei template 2>&1 >/dev/null; then
+		echo "ERROR: This hosts hostname contains the word 'template' which matches it's intended name or the template has been booted up.  Exiting as a result since we consider this host out of scope of a build in this scenario.";
+		exit 0;
+	else
+		echo "PROCEEDING: Hostname did not have the word template in it.";
+	fi
+
 	IPAEXISTS=$(dig -x $IPADDR | grep -Ei "PTR"|grep -Evi "^;"|awk '{ print $NF }'|sed -e "s/[.]$//g")
 	HOSTEXISTS=$( hostnamectl | grep -Ei "$NHOSTNAME[.]$NDOMAIN" );
 	if [[ $IPAEXISTS != "" || $HOSTEXISTS != "" ]]; then
@@ -560,11 +567,6 @@ while [[ true ]]; do
 			fi
 		done
 
-
-		if echo "$HOSTEXISTS" | grep -Ei template 2>&1 >/dev/null; then
-			echo "ERROR: This hosts hostname contains the word 'template' which matches it's intended name or the template has been booted up.  Exiting as a result since we consider this host as complete in this scenario.";
-			exit 0;
-		fi
 
 		# No DNS entry for this host exists. But unique IP does.  Meaning Unique IP should be added and DNS entry set.  Ready to break out.
 		break;
@@ -825,6 +827,8 @@ rm -f $IFCFG_T;
 rm -f /etc/dhcp/dhclient.conf
 rm -f /etc/sysconfig/network-scripts/auto-net.sh
 
+# Disable the auto-net systemcd job.
+systemctl disable auto-net;
 
 # Return to the former directory.
 cd $CWD;
