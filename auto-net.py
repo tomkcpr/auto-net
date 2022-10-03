@@ -41,17 +41,13 @@ class AutoNet:
 
 		print("Checking if path %s exists: " % (dirLogPath))
 
-		exists = os.path.exists(dirLogPath))
+		# Test if path exists.  Create it if it doesn't exist.
+		exists = os.path.exists(dirLogPath)
 		if not exists:
-
-			# Create a new directory because it does not exist
-			os.makedirs(dirLogPath)
+			os.mkdir(dirLogPath, 0o750)
 			print("The new directory, %s,  is created!" % (dirLogPath))
 
-		try:
-			fh = logging.FileHandler(self.logFile)
-		except:
-			os.mkdir(, 0o750)
+		fh = logging.FileHandler(self.logFile)
 
 		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 		fh.setFormatter(formatter)
