@@ -75,7 +75,11 @@ class AutoNet:
 
 		print(yaml.dump(self.__yamlConfig))
 
-		print(self.__yamlConfig.get('autonet.ipa',0))
+		print(self.__yamlConfig.get('autonet',0))
+		print(self.__yamlConfig.keys())
+		print(self.__yamlConfig.get("autonet")
+		print(self.__yamlConfig.get("ipa")
+		print(self.__yamlConfig.get("autonet.ipa")
 
 
 	# ----------------------------------------------------------------------------------------------------------
