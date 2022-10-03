@@ -87,6 +87,8 @@ class AutoNet:
 
 		print(json.dumps(self.__yamlConfig, indent=4))
 
+		print(self.__yamlConfig.get("ipa",0)
+
 
 	# ----------------------------------------------------------------------------------------------------------
 	#
