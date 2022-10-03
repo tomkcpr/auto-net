@@ -35,7 +35,7 @@ class AutoNet:
 		self.log = log
 		log.setLevel(logging.DEBUG)
 
-		self.loadConf(confFile)
+		self.loadConf(self.confFile)
 
 		dirLogPath=os.path.dirname(logFile)
 
