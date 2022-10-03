@@ -1,16 +1,15 @@
 auto-net:
     dns:
         - 192.168.0.224
-        - 192.168.0.44
-        - 192.168.0.45
         - 192.168.0.46
-        - 192.168.0.154
-        - 192.168.0.155
+        - 192.168.0.51
     domain:
         - nix.mds.xyz
     ipa:
-        - idmipa01
-        - idmipa02
+        - idmipa01.nix.mds.xyz
+        - idmipa02.nix.mds.xyz
+        - idmipa03.nix.mds.xyz
+        - idmipa04.nix.mds.xyz
     ncpath:
         - /etc/sysconfig/network-scripts
     ifcfg:
