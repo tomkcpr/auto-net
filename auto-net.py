@@ -77,7 +77,7 @@ class AutoNet:
 
 		for k, v in self.__yamlConfig['autonet'].items():
 			if self.__yamlConfig['autonet'][k].has_key("ipa"):
-				print self.__yamlConfig['autonet'][k].has_key("ipa")
+				print(self.__yamlConfig['autonet'][k].has_key("ipa"))
 
 
 
