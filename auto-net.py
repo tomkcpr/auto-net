@@ -69,8 +69,9 @@ class AutoNet:
 			# Read YAML config file
 			with open(config, 'r') as stream:
 			    self.__yamlConfig = yaml.safe_load(stream)
-		export:
-			print("Config file %s, did not exist or could not be loaded.  Exiting." % (config))
+		except:
+			print("ERROR: Config file %s, did not exist or could not be loaded.  Exiting." % (config))
+    			sys.exit(1)
 
 		pyaml.dump(self.__yamlConfig)
 
