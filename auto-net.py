@@ -81,6 +81,9 @@ class AutoNet:
 		print("[3] %s" % (self.__yamlConfig.get("ipa")))
 		print("[4] %s" % (self.__yamlConfig.get("autonet.ipa")))
 
+		for key, value in self.__yamlConfig.items():
+			print(key + " : " + str(value))
+
 
 	# ----------------------------------------------------------------------------------------------------------
 	#
