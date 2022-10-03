@@ -203,7 +203,7 @@ def main():
 	an.logmsg("main(): Number of arguments: " + str(len(sys.argv)))
 	an.logmsg("main(): The arguments are: " + str(sys.argv))
 
-	an.loadConfiguration()
+	an.loadConf()
 
 
 if __name__ == "__main__":
