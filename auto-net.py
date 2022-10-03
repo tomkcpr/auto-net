@@ -10,6 +10,7 @@ import sys				# pip3 install sys
 import logging
 import nmap				# pip3 install nmap
 import os
+import yaml
 
 # ---------------------------------------------------------------------------------------------------------------------------
 #
