@@ -1,4 +1,4 @@
-auto-net:
+autonet:
     dns:
         - 192.168.0.224
         - 192.168.0.46
@@ -22,7 +22,7 @@ auto-net:
         - /etc/dhcp/dhclient.conf
     dhclient-retries:
         - 20
-    tmp-ip-file:
+    tmpipfile:
         - /tmp/.eDrsldDI.tmp
-    log-file:
+    logfile:
         - /var/log/auto-net/auto-net.log
