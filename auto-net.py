@@ -27,6 +27,9 @@ class AutoNet:
 	confFile="/etc/sysconfig/auto-net/auto-net.yml"						# DEFAULT
 	ipAddress=""
 
+	# Declaring private because I feel like it.
+	__yamlConfig=None
+
 	def __init__(self):
 		self.ipAddress = ""
 
@@ -60,7 +63,12 @@ class AutoNet:
 	#
 	# ----------------------------------------------------------------------------------------------------------
 	def loadConf(self,config):
-		pass
+
+		# Read YAML config file
+		with open(config, 'r') as stream:
+		    self.__yamlConfig = yaml.safe_load(stream)
+
+		pyaml.dump(self.__yamlConfig)
 
 
 
