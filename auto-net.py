@@ -75,7 +75,7 @@ class AutoNet:
 
 		print(yaml.dump(self.__yamlConfig))
 
-		print(yaml.auto-net.ipa)
+		print(yaml.autonet.ipa)
 
 
 
