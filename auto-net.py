@@ -9,6 +9,7 @@ import random
 import sys				# pip3 install sys
 import logging
 import nmap				# pip3 install nmap
+import os
 
 # ---------------------------------------------------------------------------------------------------------------------------
 #
@@ -33,7 +34,21 @@ class AutoNet:
 		self.ipAddress = ""
 		self.log = log
 		log.setLevel(logging.DEBUG)
-		fh = logging.FileHandler(self.logFile)
+
+		self.loadConf(confFile)
+
+		isExist = os.path.exists(os.path.dirname(logFile))
+		if not isExist:
+
+			# Create a new directory because it does not exist
+			os.makedirs(os.path.dirname(logFile))
+			print("The new directory, %s,  is created!" % (os.path.dirname(logFile)))
+
+		try:
+			fh = logging.FileHandler(self.logFile)
+		except:
+			os.mkdir(, 0o750)
+
 		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 		fh.setFormatter(formatter)
 		log.addHandler(fh)
@@ -44,7 +59,7 @@ class AutoNet:
 	#
 	#
 	# ----------------------------------------------------------------------------------------------------------
-	def loadConfiguration(self,config):
+	def loadConf(self,config):
 		pass
 
 
