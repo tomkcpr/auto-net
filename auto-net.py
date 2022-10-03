@@ -73,7 +73,7 @@ class AutoNet:
 			print("ERROR: Config file %s, did not exist or could not be loaded.  Exiting." % (config))
 			sys.exit(1)
 
-		pyaml.dump(self.__yamlConfig)
+		yaml.dump(self.__yamlConfig)
 
 
 
