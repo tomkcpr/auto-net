@@ -75,10 +75,10 @@ class AutoNet:
 
         	# NMAP VLAN to determine IP availability.
 		self.logmsg("nmapScan(self, vlan, netmask)")
-	        self.logmsg("vlan: " + vlan)
-	        self.logmsg("netmask: " + netmask)
+		self.logmsg("vlan: " + vlan)
+		self.logmsg("netmask: " + netmask)
 
-	        nm = nmap.PortScanner ()
+		nm = nmap.PortScanner ()
 
 		cidr=ipaddress.IPv4Network('0.0.0.0/' + netmask).prefixlen
 		# print ("cidr: ", cidr);
