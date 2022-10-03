@@ -22,7 +22,8 @@ import nmap				# pip3 install nmap
 #
 # ---------------------------------------------------------------------------------------------------------------------------
 class AutoNet:
-	logFile=""
+	logFile="/var/log/auto-net/auto-net-default.log"					# DEFAULT
+	confFile="/etc/sysconfig/auto-net/auto-net.yml"						# DEFAULT
 	ipAddress=""
 
 	def __init__(self):
