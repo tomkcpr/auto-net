@@ -37,8 +37,10 @@ class AutoNet:
 
 		self.loadConf(confFile)
 
-		isExist = os.path.exists(os.path.dirname(logFile))
-		if not isExist:
+		print("Checking if path %s exists: " % (os.path.dirname(logFile)))
+
+		exists = os.path.exists(os.path.dirname(logFile))
+		if not exists:
 
 			# Create a new directory because it does not exist
 			os.makedirs(os.path.dirname(logFile))
