@@ -76,7 +76,7 @@ class AutoNet:
 		print(yaml.dump(self.__yamlConfig))
 
 		for val in find(__yamlConfig, 'ipa'):
-			print val
+			print(val)
 
 
 
