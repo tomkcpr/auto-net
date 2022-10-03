@@ -37,14 +37,16 @@ class AutoNet:
 
 		self.loadConf(confFile)
 
-		print("Checking if path %s exists: " % (os.path.dirname(logFile)))
+		dirLogPath=os.path.dirname(logFile)
 
-		exists = os.path.exists(os.path.dirname(logFile))
+		print("Checking if path %s exists: " % (dirLogPath))
+
+		exists = os.path.exists(dirLogPath))
 		if not exists:
 
 			# Create a new directory because it does not exist
-			os.makedirs(os.path.dirname(logFile))
-			print("The new directory, %s,  is created!" % (os.path.dirname(logFile)))
+			os.makedirs(dirLogPath)
+			print("The new directory, %s,  is created!" % (dirLogPath))
 
 		try:
 			fh = logging.FileHandler(self.logFile)
