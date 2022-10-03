@@ -84,6 +84,8 @@ class AutoNet:
 		for key, value in self.__yamlConfig.items():
 			print(key + " : " + str(value))
 
+		print(json.dumps(self.__yamlConfig, indent=4)
+
 
 	# ----------------------------------------------------------------------------------------------------------
 	#
