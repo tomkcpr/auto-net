@@ -34,7 +34,7 @@ class AutoNet:
 	#
 	#
 	# ----------------------------------------------------------------------------------------------------------
-	 def loadConfiguration(self,config):
+	def loadConfiguration(self,config):
 		pass
 
 
