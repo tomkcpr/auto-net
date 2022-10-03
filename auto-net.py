@@ -13,7 +13,7 @@ import random
 #
 # ---------------------------------------------------------------------------------------------------------------------------
 class AutoNet:
-	logFile="/var/log/auto-net/auto-net.log"
+	logFile=""
 	ipAddress=""
 
 	def __init__(self):
@@ -34,7 +34,8 @@ class AutoNet:
 	#
 	#
 	# ----------------------------------------------------------------------------------------------------------
-	def loadConfiguration(self,config):
+	 def loadConfiguration(self,config):
+		pass
 
 
 
@@ -176,6 +177,7 @@ def main():
 	an.logmsg("main(): Number of arguments: " + str(len(sys.argv)))
 	an.logmsg("main(): The arguments are: " + str(sys.argv))
 
+	an.loadConfiguration()
 
 
 if __name__ == "__main__":
