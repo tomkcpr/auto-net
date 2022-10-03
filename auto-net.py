@@ -37,7 +37,7 @@ class AutoNet:
 
 		self.loadConf(self.confFile)
 
-		dirLogPath=os.path.dirname(logFile)
+		dirLogPath=os.path.dirname(self.logFile)
 
 		print("Checking if path %s exists: " % (dirLogPath))
 
