@@ -125,7 +125,7 @@ class AutoNet:
 		# Check that self.finlst is not empty.  Quit otherwise.
 		self.logmsg("self.finlst: " + str(self.finlst))
 		if not self.finlst:
-		self.logmsg("ERROR: self.finlst was empty.  This indicates that the nmap scanned failed or returned no results.  Sometimes this is due to missing parameters, such as NETWORK_ADDRESS or NETWORK_MASK not being set.  This is needed by nmap.  Please check the Advanced Section and Custom Attribute Key/Value pairs for the Virtual Network.\n")
+			self.logmsg("ERROR: self.finlst was empty.  This indicates that the nmap scanned failed or returned no results.  Sometimes this is due to missing parameters, such as NETWORK_ADDRESS or NETWORK_MASK not being set.  This is needed by nmap.  Please check the Advanced Section and Custom Attribute Key/Value pairs for the Virtual Network.\n")
 
 		for x in range(len(self.finlst)):
 			# print("DNS.  PTR of: ", self.finlst[x][0])
