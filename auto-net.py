@@ -25,7 +25,7 @@ import yaml				# pip3 install pyyaml
 # ---------------------------------------------------------------------------------------------------------------------------
 class AutoNet:
 	logFile="/var/log/auto-net/auto-net-default.log"					# DEFAULT
-	confFile="/etc/sysconfig/auto-net/auto-net.yml"						# DEFAULT
+	confFile="/etc/sysconfig/auto-net/auto-net.yaml"					# DEFAULT
 	ipAddress=""
 
 	# Declaring private because I feel like it.
