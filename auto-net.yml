@@ -1,27 +1,29 @@
 auto-net:
     dns:
-    - 192.168.0.224
-    - 192.168.0.44
-    - 192.168.0.45
-    - 192.168.0.46
-    - 192.168.0.154
-    - 192.168.0.155
+        - 192.168.0.224
+        - 192.168.0.44
+        - 192.168.0.45
+        - 192.168.0.46
+        - 192.168.0.154
+        - 192.168.0.155
     domain:
-    - nix.mds.xyz
+        - nix.mds.xyz
     ipa:
-    - idmipa01
-    - idmipa02
+        - idmipa01
+        - idmipa02
     ncpath:
-    - /etc/sysconfig/network-scripts
+        - /etc/sysconfig/network-scripts
     ifcfg:
-    - /etc/sysconfig/network-scripts/template-ifcfg-ens192
+        - /etc/sysconfig/network-scripts/template-ifcfg-ens192
     ipsubnet:
-    - 192.168.0.0/24
+        - 192.168.0.0/24
     allowed-ip-range:
-    - 192.168.0.100-192.168.0.255
+        - 192.168.0.100-192.168.0.255
     dhclient-conf:
-    - /etc/dhcp/dhclient.conf
+        - /etc/dhcp/dhclient.conf
     dhclient-retries:
-    - 20
+        - 20
     tmp-ip-file:
-    - /tmp/.eDrsldDI.tmp
+        - /tmp/.eDrsldDI.tmp
+    log-file:
+        - /var/log/auto-net/auto-net.log
