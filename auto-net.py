@@ -18,7 +18,7 @@ import json				#
 # Class Auto Net
 #
 #	Purpose: 	On a non-network enabled machine, attempt to obtain an IP address and configure
-#			the client with a DNS entry (FreeIPA), IP, SSSD AD Authentication, AutoFS (NFS)
+#			the client with a DNS entry (FreeIPA), IP, SSSD AD Authentication, AutoFS (NFS) 
 #
 #
 #
